@@ -42,6 +42,7 @@ Built with **Tauri 2** + **Svelte 5** + **TypeScript** + **Milkdown Crepe**.
   - **Inline popup**: Notion-style menu at the cursor with keyboard filter, 17 items
 - KaTeX math — inline `$...$` and block `$$...$$`
 - Code blocks — **automatic language detection** (highlight.js), line wrapping, copy button
+- **Mermaid diagrams** — ```` ```mermaid ```` code blocks render to SVG in both WYSIWYG preview and HTML/PDF export
 - **GitHub Alerts** — `> [!NOTE]` / `[!TIP]` / `[!IMPORTANT]` / `[!WARNING]` / `[!CAUTION]` rendered both in WYSIWYG and exports
 - Drag-handle to reorder blocks
 - GFM — tables, task lists, strikethrough
@@ -57,6 +58,7 @@ Built with **Tauri 2** + **Svelte 5** + **TypeScript** + **Milkdown Crepe**.
 - **Single-instance** — double-clicking more files opens new tabs in the same window
 
 ### Navigation
+- **Workspace / file tree** — open a folder, browse and click to open files in a tab
 - **Outline panel** — heading tree, click to jump
 - **Find / Replace** — regex, case-sensitive, match counter (`Ctrl+F` / `Ctrl+H`)
 - **Command Palette** (`Ctrl+Shift+P`) — fuzzy-searchable list of every action, every open tab, and every recent file
@@ -179,8 +181,7 @@ markdown-editor/
 ## Roadmap
 
 - [ ] Paste & drag-drop images (clipboard → assets folder)
-- [ ] Workspace / folder sidebar (file tree)
-- [ ] Mermaid diagram support
+- [ ] Workspace context menu (new file/folder, rename, delete)
 - [ ] Wiki-link `[[Note]]` + backlinks panel
 - [ ] AI assistance (summarize, translate) — Crepe `Feature.AI`
 - [ ] macOS & Linux release binaries

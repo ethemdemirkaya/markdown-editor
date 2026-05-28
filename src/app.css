@@ -136,3 +136,23 @@ blockquote.md-alert-bq-warning { border-color: var(--alert-warning); background:
 blockquote.md-alert-bq-warning::before { color: var(--alert-warning); }
 blockquote.md-alert-bq-caution { border-color: var(--alert-caution); background: var(--alert-caution-bg); }
 blockquote.md-alert-bq-caution::before { color: var(--alert-caution); }
+
+/* Mermaid preview */
+.mermaid-preview {
+  padding: 12px;
+  text-align: center;
+}
+.mermaid-preview svg {
+  max-width: 100%;
+  height: auto;
+}
+.mermaid-error {
+  background: var(--alert-caution-bg);
+  color: var(--alert-caution);
+  border-left: 4px solid var(--alert-caution);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+}

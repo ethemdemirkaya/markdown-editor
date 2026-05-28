@@ -9,6 +9,8 @@
   import WysiwygEditor from '$lib/WysiwygEditor.svelte';
   import SourceView from '$lib/SourceView.svelte';
   import OutlinePanel from '$lib/OutlinePanel.svelte';
+  import FileTree from '$lib/FileTree.svelte';
+  import { workspaceRoot, pickWorkspace, closeWorkspace } from '$lib/workspace';
   import { viewMode, toggleViewMode } from '$lib/viewMode';
   import FindReplace from '$lib/FindReplace.svelte';
   import SettingsPanel from '$lib/SettingsPanel.svelte';
@@ -136,7 +138,24 @@ $$
     editorRev++;
   }
   let outlineOpen = $state($settings.outlineDefaultOpen);
+  let workspaceOpen = $state(typeof localStorage !== 'undefined' ? localStorage.getItem('markdown-editor:workspace-visible') !== 'closed' : true);
   let settingsOpen = $state(false);
+
+  function toggleWorkspace() {
+    workspaceOpen = !workspaceOpen;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('markdown-editor:workspace-visible', workspaceOpen ? 'open' : 'closed');
+    }
+  }
+
+  async function onOpenFromTree(path: string) {
+    try {
+      const { content } = await openFileByPath(path);
+      openInTab(path, content);
+    } catch (err) {
+      console.error('Open from tree failed:', err);
+    }
+  }
 
   function toggleOutline() {
     outlineOpen = !outlineOpen;
@@ -168,6 +187,8 @@ $$
     { id: 'view.source', group: $t('group.view'), label: $viewMode === 'source' ? $t('cmd.view.wysiwyg') : $t('cmd.view.source'), shortcut: 'Ctrl+E', run: toggleViewMode },
     { id: 'view.theme', group: $t('group.view'), label: $theme === 'dark' ? $t('cmd.view.theme.light') : $t('cmd.view.theme.dark'), run: toggleTheme },
     { id: 'view.settings', group: $t('group.view'), label: $t('cmd.view.settings'), run: () => (settingsOpen = true) },
+    { id: 'workspace.open', group: $t('group.file'), label: $t('cmd.workspace.open'), run: () => { void pickWorkspace(); } },
+    ...($workspaceRoot ? [{ id: 'workspace.close', group: $t('group.file'), label: $t('cmd.workspace.close'), run: closeWorkspace }] : []),
     { id: 'edit.find', group: $t('group.edit'), label: $t('cmd.edit.find'), shortcut: 'Ctrl+F', run: () => openFind(false) },
     { id: 'edit.replace', group: $t('group.edit'), label: $t('cmd.edit.replace'), shortcut: 'Ctrl+H', run: () => openFind(true) },
     { id: 'export.html', group: $t('group.export'), label: $t('cmd.export.html'), run: handleExportHtml },
@@ -195,11 +216,15 @@ $$
     if (id) closeDoc(id);
   }
 
-  function handleExportPdf() {
+  async function handleExportPdf() {
     const doc = get(activeDoc);
     if (!doc) return;
     const baseName = docName(doc).replace(/\.(md|markdown|txt)$/i, '');
-    printPdfFromSource(doc.content, baseName);
+    try {
+      await printPdfFromSource(doc.content, baseName);
+    } catch (err) {
+      console.error('PDF export failed:', err);
+    }
   }
 
   async function handleExportHtml() {
@@ -212,7 +237,7 @@ $$
         : `${baseName}.html`;
       const path = await chooseHtmlExportPath(suggested);
       if (!path) return;
-      const html = renderStandaloneHtml(doc.content, baseName, get(theme));
+      const html = await renderStandaloneHtml(doc.content, baseName, get(theme));
       await saveToPath(path, html);
     } catch (err) {
       console.error('Export failed:', err);
@@ -319,6 +344,7 @@ $$
     <button class="btn" type="button" onclick={toggleViewMode} title={$t('topbar.viewmode.tooltip')}>
       {$viewMode === 'source' ? $t('topbar.wysiwyg') : $t('topbar.source')}
     </button>
+    <button class="icon-btn" type="button" onclick={toggleWorkspace} title={$t('topbar.workspace.tooltip')}>📁</button>
     <button class="icon-btn" type="button" onclick={toggleOutline} title={$t('topbar.outline.tooltip')}>≡</button>
     <button class="icon-btn" type="button" onclick={() => (settingsOpen = true)} title={$t('topbar.settings.tooltip')}>⚙</button>
     <button class="icon-btn" type="button" onclick={toggleTheme} title={$t('topbar.theme.tooltip')}>
@@ -329,6 +355,9 @@ $$
   <TabBar />
 
   <main class="main">
+    {#if workspaceOpen}
+      <FileTree activePath={$activeDoc?.path ?? null} onOpen={onOpenFromTree} />
+    {/if}
     {#if $activeDoc}
       {#key `${$activeDoc.id}:${editorRev}:${$viewMode}`}
         {#if $viewMode === 'source'}

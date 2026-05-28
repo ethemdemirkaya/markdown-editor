@@ -55,6 +55,7 @@ const en: Dict = {
   'topbar.wysiwyg': 'WYSIWYG',
   'topbar.viewmode.tooltip': 'View mode (Ctrl/Cmd+E)',
   'topbar.outline.tooltip': 'Outline panel',
+  'topbar.workspace.tooltip': 'Workspace / file tree',
   'topbar.settings.tooltip': 'Settings',
   'topbar.theme.tooltip': 'Toggle theme',
   'topbar.empty': 'No tabs open.',
@@ -68,6 +69,15 @@ const en: Dict = {
   // Outline
   'outline.title': 'Outline',
   'outline.empty': 'No headings',
+
+  // Workspace
+  'workspace.title': 'Workspace',
+  'workspace.open': 'Open folder',
+  'workspace.close': 'Close workspace',
+  'workspace.refresh': 'Refresh',
+  'workspace.empty': 'Open a folder to browse its files.',
+  'cmd.workspace.open': 'Open folder…',
+  'cmd.workspace.close': 'Close workspace',
 
   // Find / Replace
   'find.placeholder': 'Find',
@@ -178,6 +188,7 @@ const tr: Dict = {
   'topbar.wysiwyg': 'WYSIWYG',
   'topbar.viewmode.tooltip': 'Görünüm modu (Ctrl/Cmd+E)',
   'topbar.outline.tooltip': 'İçindekiler paneli',
+  'topbar.workspace.tooltip': 'Çalışma alanı / dosya ağacı',
   'topbar.settings.tooltip': 'Ayarlar',
   'topbar.theme.tooltip': 'Tema değiştir',
   'topbar.empty': 'Hiç sekme açık değil.',
@@ -189,6 +200,14 @@ const tr: Dict = {
 
   'outline.title': 'İçindekiler',
   'outline.empty': 'Başlık yok',
+
+  'workspace.title': 'Çalışma alanı',
+  'workspace.open': 'Klasör aç',
+  'workspace.close': 'Çalışma alanını kapat',
+  'workspace.refresh': 'Yenile',
+  'workspace.empty': 'Dosyaları görmek için bir klasör aç.',
+  'cmd.workspace.open': 'Klasör aç…',
+  'cmd.workspace.close': 'Çalışma alanını kapat',
 
   'find.placeholder': 'Bul',
   'find.replace.placeholder': 'Değiştir',
@@ -292,6 +311,7 @@ const de: Dict = {
   'topbar.wysiwyg': 'WYSIWYG',
   'topbar.viewmode.tooltip': 'Ansichtsmodus (Strg/Cmd+E)',
   'topbar.outline.tooltip': 'Gliederung',
+  'topbar.workspace.tooltip': 'Arbeitsbereich / Dateibaum',
   'topbar.settings.tooltip': 'Einstellungen',
   'topbar.theme.tooltip': 'Design wechseln',
   'topbar.empty': 'Keine Tabs geöffnet.',
@@ -303,6 +323,14 @@ const de: Dict = {
 
   'outline.title': 'Gliederung',
   'outline.empty': 'Keine Überschriften',
+
+  'workspace.title': 'Arbeitsbereich',
+  'workspace.open': 'Ordner öffnen',
+  'workspace.close': 'Arbeitsbereich schließen',
+  'workspace.refresh': 'Aktualisieren',
+  'workspace.empty': 'Öffne einen Ordner, um seine Dateien zu durchsuchen.',
+  'cmd.workspace.open': 'Ordner öffnen…',
+  'cmd.workspace.close': 'Arbeitsbereich schließen',
 
   'find.placeholder': 'Suchen',
   'find.replace.placeholder': 'Ersetzen',
@@ -406,6 +434,7 @@ const fr: Dict = {
   'topbar.wysiwyg': 'WYSIWYG',
   'topbar.viewmode.tooltip': "Mode d'affichage (Ctrl/Cmd+E)",
   'topbar.outline.tooltip': 'Sommaire',
+  'topbar.workspace.tooltip': "Espace de travail / arbre de fichiers",
   'topbar.settings.tooltip': 'Paramètres',
   'topbar.theme.tooltip': 'Changer de thème',
   'topbar.empty': 'Aucun onglet ouvert.',
@@ -417,6 +446,14 @@ const fr: Dict = {
 
   'outline.title': 'Sommaire',
   'outline.empty': 'Aucun titre',
+
+  'workspace.title': 'Espace de travail',
+  'workspace.open': 'Ouvrir un dossier',
+  'workspace.close': "Fermer l'espace de travail",
+  'workspace.refresh': 'Actualiser',
+  'workspace.empty': 'Ouvrez un dossier pour parcourir ses fichiers.',
+  'cmd.workspace.open': 'Ouvrir un dossier…',
+  'cmd.workspace.close': "Fermer l'espace de travail",
 
   'find.placeholder': 'Rechercher',
   'find.replace.placeholder': 'Remplacer',
@@ -520,6 +557,7 @@ const es: Dict = {
   'topbar.wysiwyg': 'WYSIWYG',
   'topbar.viewmode.tooltip': 'Modo de vista (Ctrl/Cmd+E)',
   'topbar.outline.tooltip': 'Esquema',
+  'topbar.workspace.tooltip': 'Espacio de trabajo / árbol de archivos',
   'topbar.settings.tooltip': 'Ajustes',
   'topbar.theme.tooltip': 'Cambiar tema',
   'topbar.empty': 'No hay pestañas abiertas.',
@@ -531,6 +569,14 @@ const es: Dict = {
 
   'outline.title': 'Esquema',
   'outline.empty': 'Sin encabezados',
+
+  'workspace.title': 'Espacio de trabajo',
+  'workspace.open': 'Abrir carpeta',
+  'workspace.close': 'Cerrar espacio de trabajo',
+  'workspace.refresh': 'Actualizar',
+  'workspace.empty': 'Abre una carpeta para ver sus archivos.',
+  'cmd.workspace.open': 'Abrir carpeta…',
+  'cmd.workspace.close': 'Cerrar espacio de trabajo',
 
   'find.placeholder': 'Buscar',
   'find.replace.placeholder': 'Reemplazar',

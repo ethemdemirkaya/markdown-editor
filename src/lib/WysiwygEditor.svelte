@@ -10,6 +10,7 @@
   import { theme } from './theme';
   import { autoDetectCodeLanguage } from './auto-language';
   import { githubAlertDecoration } from './github-alerts';
+  import { renderMermaidInto } from './mermaid';
   import { getSettings } from './settings';
   import InlineBlockMenu from './InlineBlockMenu.svelte';
 
@@ -163,6 +164,15 @@
       featureConfigs: {
         [Crepe.Feature.CodeMirror]: {
           extensions: [EditorView.lineWrapping],
+          renderPreview: (language: string, content: string, applyPreview: (value: null | string | HTMLElement) => void) => {
+            if (typeof language === 'string' && language.trim().toLowerCase() === 'mermaid') {
+              const host = document.createElement('div');
+              renderMermaidInto(content, host);
+              applyPreview(host);
+              return host;
+            }
+            return null;
+          },
         },
       },
     });

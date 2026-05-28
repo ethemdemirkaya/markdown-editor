@@ -7,6 +7,7 @@ import hljsLight from 'highlight.js/styles/github.css?raw';
 import hljsDark from 'highlight.js/styles/github-dark.css?raw';
 import katexCss from 'katex/dist/katex.min.css?raw';
 import { markedGithubAlerts } from './github-alerts';
+import { markedMermaid } from './mermaid';
 
 const exporter = new Marked(
   markedHighlight({
@@ -20,7 +21,8 @@ const exporter = new Marked(
 );
 exporter.use(markedKatex({ throwOnError: false, nonStandard: true }));
 exporter.use(markedGithubAlerts);
-exporter.setOptions({ gfm: true, breaks: false });
+exporter.use(markedMermaid);
+exporter.setOptions({ gfm: true, breaks: false, async: true });
 
 const baseCss = `
   :root {
@@ -164,6 +166,23 @@ const baseCss = `
   .markdown-body .md-alert-warning .md-alert-title { color: var(--alert-warning); }
   .markdown-body .md-alert-caution { border-color: var(--alert-caution); background: var(--alert-caution-bg); }
   .markdown-body .md-alert-caution .md-alert-title { color: var(--alert-caution); }
+  .markdown-body .mermaid-block {
+    margin: 0.8em 0;
+    text-align: center;
+  }
+  .markdown-body .mermaid-block svg {
+    max-width: 100%;
+    height: auto;
+  }
+  .markdown-body .mermaid-error {
+    background: var(--alert-caution-bg);
+    color: var(--alert-caution);
+    border-left: 4px solid var(--alert-caution);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 0.85em;
+  }
 `;
 
 function escapeHtml(s: string): string {
@@ -174,15 +193,16 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-export function renderPrintableHtml(source: string, title: string): string {
-  return renderStandaloneHtml(source, title, 'light').replace(
+export async function renderPrintableHtml(source: string, title: string): Promise<string> {
+  const html = await renderStandaloneHtml(source, title, 'light');
+  return html.replace(
     '</body>',
     `<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),120));</script></body>`,
   );
 }
 
-export function printPdfFromSource(source: string, title: string): void {
-  const html = renderPrintableHtml(source, title);
+export async function printPdfFromSource(source: string, title: string): Promise<void> {
+  const html = await renderPrintableHtml(source, title);
   const iframe = document.createElement('iframe');
   iframe.setAttribute('aria-hidden', 'true');
   iframe.style.position = 'fixed';
@@ -209,13 +229,28 @@ export function printPdfFromSource(source: string, title: string): void {
   document.body.appendChild(iframe);
 }
 
-export function renderStandaloneHtml(
+export async function renderStandaloneHtml(
   source: string,
   title: string,
   mode: 'light' | 'dark',
-): string {
-  const raw = exporter.parse(source, { async: false }) as string;
-  const safe = DOMPurify.sanitize(raw);
+): Promise<string> {
+  const raw = (await exporter.parse(source)) as string;
+  const safe = DOMPurify.sanitize(raw, {
+    ADD_TAGS: [
+      'svg', 'g', 'defs', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline',
+      'polygon', 'text', 'tspan', 'use', 'marker', 'clipPath', 'pattern', 'mask',
+      'linearGradient', 'radialGradient', 'stop', 'filter', 'foreignObject', 'desc', 'title',
+    ],
+    ADD_ATTR: [
+      'viewBox', 'd', 'fill', 'stroke', 'stroke-width', 'stroke-linecap',
+      'stroke-linejoin', 'stroke-dasharray', 'transform', 'cx', 'cy', 'r',
+      'rx', 'ry', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'points', 'width',
+      'height', 'preserveAspectRatio', 'marker-end', 'marker-start', 'marker-mid',
+      'text-anchor', 'dominant-baseline', 'font-family', 'font-size',
+      'xmlns', 'xmlns:xlink', 'xlink:href', 'aria-roledescription',
+      'pointer-events', 'style', 'class',
+    ],
+  });
   const hljsCss = mode === 'dark' ? hljsDark : hljsLight;
   return `<!doctype html>
 <html lang="en" data-theme="${mode}">
