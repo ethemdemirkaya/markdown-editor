@@ -11,6 +11,8 @@
   import OutlinePanel from '$lib/OutlinePanel.svelte';
   import { viewMode, toggleViewMode } from '$lib/viewMode';
   import FindReplace from '$lib/FindReplace.svelte';
+  import SettingsPanel from '$lib/SettingsPanel.svelte';
+  import { settings } from '$lib/settings';
   import { theme, toggleTheme } from '$lib/theme';
   import { openFile, saveToPath, chooseSavePath, chooseHtmlExportPath } from '$lib/file';
   import { renderStandaloneHtml, printPdfFromSource } from '$lib/export';
@@ -129,15 +131,11 @@ $$
     updateContent(id, next);
     editorRev++;
   }
-  let outlineOpen = $state(
-    typeof localStorage !== 'undefined' ? localStorage.getItem('markdown-editor:outline') !== 'closed' : true,
-  );
+  let outlineOpen = $state($settings.outlineDefaultOpen);
+  let settingsOpen = $state(false);
 
   function toggleOutline() {
     outlineOpen = !outlineOpen;
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('markdown-editor:outline', outlineOpen ? 'open' : 'closed');
-    }
   }
 
   async function openRecent(path: string) {
@@ -281,6 +279,7 @@ $$
       {$viewMode === 'source' ? 'WYSIWYG' : 'Kaynak'}
     </button>
     <button class="icon-btn" type="button" onclick={toggleOutline} title="İçindekiler paneli">≡</button>
+    <button class="icon-btn" type="button" onclick={() => (settingsOpen = true)} title="Ayarlar">⚙</button>
     <button class="icon-btn" type="button" onclick={toggleTheme} title="Tema değiştir">
       {$theme === 'dark' ? '☀' : '☾'}
     </button>
@@ -307,6 +306,9 @@ $$
           getSource={() => $activeDoc?.content ?? ''}
           setSource={setActiveContent}
         />
+      {/if}
+      {#if settingsOpen}
+        <SettingsPanel onClose={() => (settingsOpen = false)} />
       {/if}
     {:else}
       <div class="empty">Hiç sekme açık değil. <button class="btn" onclick={handleNew}>Yeni Sekme</button></div>

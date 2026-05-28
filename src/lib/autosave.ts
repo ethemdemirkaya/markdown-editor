@@ -1,6 +1,7 @@
 import { writeTextFile } from '@tauri-apps/plugin-fs';
 import { get } from 'svelte/store';
 import { docs, activeId, markSaved, restoreSession, type Doc } from './documents';
+import { getSettings } from './settings';
 
 const STORAGE_KEY = 'markdown-editor:session';
 const AUTOSAVE_DELAY = 1500;
@@ -22,6 +23,7 @@ function persistSnapshot(): void {
 }
 
 async function flushToDisk(): Promise<void> {
+  if (!getSettings().autosaveEnabled) return;
   const list = get(docs);
   for (const doc of list) {
     if (!doc.path) continue;

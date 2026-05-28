@@ -3,6 +3,7 @@ import { confirm } from '@tauri-apps/plugin-dialog';
 import { get } from 'svelte/store';
 import { docs, isDirty } from './documents';
 import { flushNow } from './autosave';
+import { getSettings } from './settings';
 
 export async function installCloseGuard(): Promise<() => void> {
   const win = getCurrentWindow();
@@ -10,6 +11,7 @@ export async function installCloseGuard(): Promise<() => void> {
 
   const unlisten = await win.onCloseRequested(async (event) => {
     if (detached) return;
+    if (!getSettings().confirmOnClose) return;
     const dirtyDocs = get(docs).filter(isDirty);
     if (dirtyDocs.length === 0) return;
 

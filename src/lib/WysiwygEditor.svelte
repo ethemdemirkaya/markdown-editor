@@ -9,6 +9,8 @@
   import { TextSelection } from '@milkdown/prose/state';
   import { theme } from './theme';
   import { autoDetectCodeLanguage } from './auto-language';
+  import { getSettings } from './settings';
+  import InlineBlockMenu from './InlineBlockMenu.svelte';
 
   type Props = {
     value: string;
@@ -22,10 +24,84 @@
   let unsubTheme: (() => void) | null = null;
   let themeStyleEl: HTMLStyleElement | null = null;
 
+  let inlineMenuOpen = $state(false);
+  let inlineMenuX = $state(0);
+  let inlineMenuY = $state(0);
+  let inlineMenuAnchor: { from: number; to: number } | null = null;
+
+  function openInlineMenu() {
+    if (!crepe) return;
+    crepe.editor.action((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      const coords = view.coordsAtPos(view.state.selection.from);
+      inlineMenuX = coords.left;
+      inlineMenuY = coords.bottom + 4;
+      inlineMenuAnchor = { from: view.state.selection.from, to: view.state.selection.to };
+      inlineMenuOpen = true;
+    });
+  }
+
+  function closeInlineMenu() {
+    inlineMenuOpen = false;
+    inlineMenuAnchor = null;
+  }
+
+  type InlineItem = {
+    snippet: string;
+    cursorOffset?: number;
+    asNewBlock?: boolean;
+  };
+
+  function applyInlineItem(item: InlineItem) {
+    if (!crepe) {
+      closeInlineMenu();
+      return;
+    }
+    crepe.editor.action((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      const pos = inlineMenuAnchor?.from ?? view.state.selection.from;
+
+      let snippet = item.snippet;
+
+      // asNewBlock = bloğun başında olması gereken yapı (heading, list, code, ...)
+      // Eğer cursor satır içindeyse satır sonrası ya da node sonrası ekleniyor (snippet baştaki \n ile)
+      // Eğer satır başındaysak ve boşsa, baştaki \n'yi kaldır
+      const head = view.state.doc.resolve(pos);
+      const atLineStart = head.parentOffset === 0;
+      const lineEmpty = head.parent.content.size === 0;
+      if (item.asNewBlock && atLineStart && lineEmpty && snippet.startsWith('\n')) {
+        snippet = snippet.slice(1);
+      }
+
+      let tr = view.state.tr.insertText(snippet, pos);
+
+      // Cursor offset uygulaması
+      if (typeof item.cursorOffset === 'number') {
+        const cursorPos = pos + item.cursorOffset;
+        tr = tr.setSelection(TextSelection.create(tr.doc, cursorPos));
+      }
+
+      view.dispatch(tr);
+      view.focus();
+    });
+    closeInlineMenu();
+  }
+
   function onAtKeydown(e: KeyboardEvent) {
     if (e.key !== '@' || e.ctrlKey || e.metaKey || e.altKey) return;
     if (!crepe) return;
+
+    const behavior = getSettings().atBehavior;
+    if (behavior === 'disabled') return; // sadece @ karakteri yazılır
+
     e.preventDefault();
+
+    if (behavior === 'inline') {
+      openInlineMenu();
+      return;
+    }
+
+    // new-paragraph davranışı: Crepe slash menüsünü tetikle
     crepe.editor.action((ctx) => {
       const view = ctx.get(editorViewCtx);
       const { state } = view;
@@ -117,6 +193,15 @@
 </script>
 
 <div bind:this={host} class="wysiwyg"></div>
+
+{#if inlineMenuOpen}
+  <InlineBlockMenu
+    x={inlineMenuX}
+    y={inlineMenuY}
+    onPick={applyInlineItem}
+    onClose={closeInlineMenu}
+  />
+{/if}
 
 <style>
   .wysiwyg {
