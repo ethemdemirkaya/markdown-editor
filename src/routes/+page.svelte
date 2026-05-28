@@ -13,7 +13,8 @@
   import FindReplace from '$lib/FindReplace.svelte';
   import SettingsPanel from '$lib/SettingsPanel.svelte';
   import { settings } from '$lib/settings';
-  import CommandPalette, { type PaletteCommand } from '$lib/CommandPalette.svelte';
+  import CommandPalette from '$lib/CommandPalette.svelte';
+  import type { PaletteCommand } from '$lib/commands';
   import { theme, toggleTheme } from '$lib/theme';
   import { openFile, saveToPath, chooseSavePath, chooseHtmlExportPath } from '$lib/file';
   import { renderStandaloneHtml, printPdfFromSource } from '$lib/export';
@@ -117,6 +118,7 @@ $$
   }
 
   let recentOpen = $state(false);
+  let paletteOpen = $state(false);
   let findOpen = $state(false);
   let findShowReplace = $state(false);
   let editorRev = $state(0);
@@ -154,6 +156,45 @@ $$
     const norm = path.replace(/\\/g, '/');
     return norm.split('/').pop() ?? path;
   }
+
+  let paletteCommands = $derived<PaletteCommand[]>([
+    // Dosya
+    { id: 'file.new', group: 'Dosya', label: 'Yeni sekme', shortcut: 'Ctrl+N', run: handleNew },
+    { id: 'file.open', group: 'Dosya', label: 'Dosya aç…', shortcut: 'Ctrl+O', run: handleOpen },
+    { id: 'file.save', group: 'Dosya', label: 'Kaydet', shortcut: 'Ctrl+S', run: handleSave },
+    { id: 'file.save-as', group: 'Dosya', label: 'Farklı kaydet…', shortcut: 'Ctrl+Shift+S', run: handleSaveAs },
+    { id: 'file.close', group: 'Dosya', label: 'Aktif sekmeyi kapat', shortcut: 'Ctrl+W', run: handleCloseActive },
+    // Görünüm
+    { id: 'view.outline', group: 'Görünüm', label: outlineOpen ? 'İçindekiler panelini gizle' : 'İçindekiler panelini göster', run: toggleOutline },
+    { id: 'view.source', group: 'Görünüm', label: $viewMode === 'source' ? 'WYSIWYG görünüme dön' : 'Kaynak (markdown) görünümü', shortcut: 'Ctrl+E', run: toggleViewMode },
+    { id: 'view.theme', group: 'Görünüm', label: $theme === 'dark' ? 'Light temaya geç' : 'Dark temaya geç', run: toggleTheme },
+    { id: 'view.settings', group: 'Görünüm', label: 'Ayarlar…', run: () => (settingsOpen = true) },
+    // Düzenle
+    { id: 'edit.find', group: 'Düzenle', label: 'Bul', shortcut: 'Ctrl+F', run: () => openFind(false) },
+    { id: 'edit.replace', group: 'Düzenle', label: 'Değiştir', shortcut: 'Ctrl+H', run: () => openFind(true) },
+    // Dışa aktar
+    { id: 'export.html', group: 'Dışa aktar', label: 'HTML olarak dışa aktar', run: handleExportHtml },
+    { id: 'export.pdf', group: 'Dışa aktar', label: 'PDF olarak yazdır', shortcut: 'Ctrl+P', run: handleExportPdf },
+    // Sekme navigasyonu
+    { id: 'nav.next', group: 'Sekme', label: 'Sıradaki sekme', shortcut: 'Ctrl+Tab', run: () => cycleActive(1) },
+    { id: 'nav.prev', group: 'Sekme', label: 'Önceki sekme', shortcut: 'Ctrl+Shift+Tab', run: () => cycleActive(-1) },
+    // Açık sekmeler
+    ...$docs.map((d) => ({
+      id: `tab.${d.id}`,
+      group: 'Sekmeye git',
+      label: docName(d) + (isDirty(d) ? ' ●' : ''),
+      keywords: d.path ?? '',
+      run: () => activeId.set(d.id),
+    })),
+    // Son dosyalar
+    ...$recentFiles.map((p) => ({
+      id: `recent.${p}`,
+      group: 'Son dosya',
+      label: recentLabel(p),
+      keywords: p,
+      run: () => openRecent(p),
+    })),
+  ]);
 
   function handleCloseActive() {
     const id = get(activeId);
@@ -193,6 +234,11 @@ $$
     const mod = event.ctrlKey || event.metaKey;
     if (!mod) return;
     const key = event.key.toLowerCase();
+    if (key === 'p' && event.shiftKey) {
+      event.preventDefault();
+      paletteOpen = true;
+      return;
+    }
     if (key === 's' && event.shiftKey) {
       event.preventDefault();
       handleSaveAs();
@@ -310,6 +356,9 @@ $$
       {/if}
       {#if settingsOpen}
         <SettingsPanel onClose={() => (settingsOpen = false)} />
+      {/if}
+      {#if paletteOpen}
+        <CommandPalette commands={paletteCommands} onClose={() => (paletteOpen = false)} />
       {/if}
     {:else}
       <div class="empty">Hiç sekme açık değil. <button class="btn" onclick={handleNew}>Yeni Sekme</button></div>
