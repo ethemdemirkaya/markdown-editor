@@ -1,12 +1,12 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import { readTextFile } from '@tauri-apps/plugin-fs';
+import { openFileByPath } from './file';
 import { openInTab } from './documents';
 
 async function openPaths(paths: string[]): Promise<void> {
   for (const path of paths) {
     try {
-      const content = await readTextFile(path);
+      const { content } = await openFileByPath(path);
       openInTab(path, content);
     } catch (err) {
       console.error(`Failed to open ${path}:`, err);

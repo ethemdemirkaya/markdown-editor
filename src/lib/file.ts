@@ -1,5 +1,6 @@
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
+import { pushRecent } from './recent';
 
 const FILTERS = [
   { name: 'Markdown', extensions: ['md', 'markdown'] },
@@ -16,11 +17,19 @@ export async function openFile(): Promise<OpenedFile | null> {
   });
   if (typeof selected !== 'string') return null;
   const content = await readTextFile(selected);
+  pushRecent(selected);
   return { path: selected, content };
+}
+
+export async function openFileByPath(path: string): Promise<OpenedFile> {
+  const content = await readTextFile(path);
+  pushRecent(path);
+  return { path, content };
 }
 
 export async function saveToPath(path: string, content: string): Promise<void> {
   await writeTextFile(path, content);
+  pushRecent(path);
 }
 
 export async function chooseSavePath(suggested?: string): Promise<string | null> {

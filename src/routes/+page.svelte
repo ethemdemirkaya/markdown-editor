@@ -1,6 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { initCliFileOpening } from '$lib/cli';
+  import { startAutosave, restorePreviousSession } from '$lib/autosave';
+  import { installCloseGuard } from '$lib/close-confirm';
+  import { recentFiles, removeRecent } from '$lib/recent';
+  import { openFileByPath } from '$lib/file';
   import TabBar from '$lib/TabBar.svelte';
   import WysiwygEditor from '$lib/WysiwygEditor.svelte';
   import { theme, toggleTheme } from '$lib/theme';
@@ -105,6 +109,24 @@ $$
     createUntitled('');
   }
 
+  let recentOpen = $state(false);
+
+  async function openRecent(path: string) {
+    recentOpen = false;
+    try {
+      const { content } = await openFileByPath(path);
+      openInTab(path, content);
+    } catch (err) {
+      console.error('Open recent failed:', err);
+      removeRecent(path);
+    }
+  }
+
+  function recentLabel(path: string): string {
+    const norm = path.replace(/\\/g, '/');
+    return norm.split('/').pop() ?? path;
+  }
+
   function handleCloseActive() {
     const id = get(activeId);
     if (id) closeDoc(id);
@@ -151,19 +173,27 @@ $$
     } else if (key === 'w') {
       event.preventDefault();
       handleCloseActive();
+    } else if (key === 'r') {
+      event.preventDefault();
+      recentOpen = !recentOpen;
     }
   }
 
   onMount(() => {
-    if (get(docs).length === 0) {
+    const restored = restorePreviousSession();
+    if (!restored && get(docs).length === 0) {
       createUntitled(WELCOME);
     }
+    startAutosave();
     window.addEventListener('keydown', handleKeydown);
     let unlistenCli: (() => void) | undefined;
+    let unlistenClose: (() => void) | undefined;
     void initCliFileOpening().then((u) => (unlistenCli = u));
+    void installCloseGuard().then((u) => (unlistenClose = u));
     return () => {
       window.removeEventListener('keydown', handleKeydown);
       unlistenCli?.();
+      unlistenClose?.();
     };
   });
 </script>
@@ -174,6 +204,28 @@ $$
     <div class="spacer"></div>
     <button class="btn" type="button" onclick={handleNew} title="Yeni (Ctrl/Cmd+N)">Yeni</button>
     <button class="btn" type="button" onclick={handleOpen} title="Aç (Ctrl/Cmd+O)">Aç</button>
+    <div class="dropdown-wrap">
+      <button
+        class="btn"
+        type="button"
+        onclick={() => (recentOpen = !recentOpen)}
+        title="Son dosyalar (Ctrl/Cmd+R)"
+      >Son ▾</button>
+      {#if recentOpen}
+        <div class="dropdown" role="menu">
+          {#if $recentFiles.length === 0}
+            <div class="dropdown-empty">Henüz dosya yok</div>
+          {:else}
+            {#each $recentFiles as path (path)}
+              <button class="dropdown-item" type="button" onclick={() => openRecent(path)} title={path}>
+                <span class="recent-name">{recentLabel(path)}</span>
+                <span class="recent-path">{path}</span>
+              </button>
+            {/each}
+          {/if}
+        </div>
+      {/if}
+    </div>
     <button class="btn" type="button" onclick={handleSave} title="Kaydet (Ctrl/Cmd+S)">Kaydet</button>
     <button class="btn" type="button" onclick={handleExportHtml} title="HTML olarak dışa aktar">Dışa Aktar</button>
     <button class="icon-btn" type="button" onclick={toggleTheme} title="Tema değiştir">
@@ -259,6 +311,63 @@ $$
 
   .icon-btn:hover {
     background: var(--code-inline-bg);
+  }
+
+  .dropdown-wrap {
+    position: relative;
+  }
+
+  .dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 260px;
+    max-width: 420px;
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    z-index: 100;
+    padding: 4px;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .dropdown-empty {
+    padding: 8px 10px;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .dropdown-item {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: var(--text-primary);
+    font-size: 12px;
+  }
+
+  .dropdown-item:hover {
+    background: var(--code-inline-bg);
+  }
+
+  .recent-name {
+    font-weight: 500;
+  }
+
+  .recent-path {
+    font-size: 11px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .main {

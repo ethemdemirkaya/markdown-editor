@@ -104,3 +104,10 @@ export function cycleActive(direction: 1 | -1): void {
   const nextIdx = (idx + direction + list.length) % list.length;
   activeId.set(list[nextIdx].id);
 }
+
+export function restoreSession(list: Doc[], active: string | null): void {
+  docs.set(list);
+  activeId.set(active && list.some((d) => d.id === active) ? active : (list[0]?.id ?? null));
+  const maxUntitled = list.reduce((m, d) => Math.max(m, d.untitledIndex ?? 0), 0);
+  untitledCounter = Math.max(untitledCounter, maxUntitled);
+}
