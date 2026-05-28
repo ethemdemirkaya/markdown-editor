@@ -3,7 +3,9 @@
   import Editor from '$lib/Editor.svelte';
   import Preview from '$lib/Preview.svelte';
   import TabBar from '$lib/TabBar.svelte';
+  import WysiwygEditor from '$lib/WysiwygEditor.svelte';
   import { theme, toggleTheme } from '$lib/theme';
+  import { viewMode, toggleViewMode } from '$lib/viewMode';
   import { openFile, saveToPath, chooseSavePath, chooseHtmlExportPath, basename } from '$lib/file';
   import { renderStandaloneHtml } from '$lib/export';
   import {
@@ -173,6 +175,9 @@ $$
     } else if (key === 'w') {
       event.preventDefault();
       handleCloseActive();
+    } else if (key === 'e') {
+      event.preventDefault();
+      toggleViewMode();
     }
   }
 
@@ -193,6 +198,9 @@ $$
     <button class="btn" type="button" onclick={handleOpen} title="Aç (Ctrl/Cmd+O)">Aç</button>
     <button class="btn" type="button" onclick={handleSave} title="Kaydet (Ctrl/Cmd+S)">Kaydet</button>
     <button class="btn" type="button" onclick={handleExportHtml} title="HTML olarak dışa aktar">Dışa Aktar</button>
+    <button class="btn" type="button" onclick={toggleViewMode} title="Görünüm modu (Ctrl/Cmd+E)">
+      {$viewMode === 'wysiwyg' ? 'Kaynak' : 'WYSIWYG'}
+    </button>
     <button class="icon-btn" type="button" onclick={toggleTheme} title="Tema değiştir">
       {$theme === 'dark' ? '☀' : '☾'}
     </button>
@@ -200,15 +208,23 @@ $$
 
   <TabBar />
 
-  <main class="split">
+  <main class="main">
     {#if $activeDoc}
-      {#key $activeDoc.id}
-        <section class="pane editor-pane">
-          <Editor value={$activeDoc.content} onChange={onEditorChange} />
-        </section>
-        <section class="pane preview-pane">
-          <Preview source={previewSource} />
-        </section>
+      {#key `${$activeDoc.id}:${$viewMode}`}
+        {#if $viewMode === 'wysiwyg'}
+          <section class="pane wysiwyg-pane">
+            <WysiwygEditor value={$activeDoc.content} onChange={onEditorChange} />
+          </section>
+        {:else}
+          <div class="split">
+            <section class="pane editor-pane">
+              <Editor value={$activeDoc.content} onChange={onEditorChange} />
+            </section>
+            <section class="pane preview-pane">
+              <Preview source={previewSource} />
+            </section>
+          </div>
+        {/if}
       {/key}
     {:else}
       <div class="empty">Hiç sekme açık değil. <button class="btn" onclick={handleNew}>Yeni Sekme</button></div>
@@ -282,10 +298,21 @@ $$
     background: var(--code-inline-bg);
   }
 
+  .main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+  }
+
   .split {
     flex: 1;
     display: flex;
     min-height: 0;
+  }
+
+  .wysiwyg-pane {
+    flex: 1;
+    overflow: hidden;
   }
 
   .pane {
