@@ -13,6 +13,7 @@
   import FindReplace from '$lib/FindReplace.svelte';
   import SettingsPanel from '$lib/SettingsPanel.svelte';
   import { settings } from '$lib/settings';
+  import CommandPalette, { type PaletteCommand } from '$lib/CommandPalette.svelte';
   import { theme, toggleTheme } from '$lib/theme';
   import { openFile, saveToPath, chooseSavePath, chooseHtmlExportPath } from '$lib/file';
   import { renderStandaloneHtml, printPdfFromSource } from '$lib/export';

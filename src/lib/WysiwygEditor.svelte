@@ -246,4 +246,76 @@
     word-break: break-word;
     overflow-wrap: anywhere;
   }
+
+  /* Crepe inline LaTeX edit popup düzeltmesi:
+     - Tema'nın default genişliği/yüksekliği LaTeX içerik için çok büyük.
+     - Auto-size + min/max sınırlar ile düzgün dikdörtgen kutu. */
+  :global(.milkdown-latex-inline-edit) {
+    width: auto !important;
+    min-width: 240px !important;
+    max-width: 520px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 6px 8px !important;
+    border-radius: 8px !important;
+    background: var(--bg-base) !important;
+    border: 1px solid var(--border-subtle) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.22) !important;
+  }
+
+  :global(.milkdown-latex-inline-edit .container) {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  :global(.milkdown-latex-inline-edit .container > div) {
+    flex: 1 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+  }
+
+  :global(.milkdown-latex-inline-edit .cm-editor) {
+    height: auto !important;
+    min-height: 0 !important;
+    font-family: 'JetBrains Mono', Consolas, monospace !important;
+    font-size: 13px !important;
+  }
+
+  :global(.milkdown-latex-inline-edit .cm-scroller) {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  :global(.milkdown-latex-inline-edit .cm-content) {
+    padding: 4px 6px !important;
+    white-space: pre !important;
+  }
+
+  :global(.milkdown-latex-inline-edit button) {
+    flex-shrink: 0 !important;
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 5px !important;
+    background: transparent !important;
+    border: 0 !important;
+    color: var(--accent) !important;
+    cursor: pointer !important;
+  }
+
+  :global(.milkdown-latex-inline-edit button:hover) {
+    background: var(--code-inline-bg) !important;
+  }
+
+  :global(.milkdown-latex-inline-edit button svg) {
+    width: 16px !important;
+    height: 16px !important;
+  }
 </style>
