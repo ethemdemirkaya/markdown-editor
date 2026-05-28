@@ -4,7 +4,10 @@
   import '@milkdown/crepe/theme/common/style.css';
   import crepeLight from '@milkdown/crepe/theme/classic.css?raw';
   import crepeDark from '@milkdown/crepe/theme/classic-dark.css?raw';
+  import { EditorView } from '@codemirror/view';
+  import { prosePluginsCtx } from '@milkdown/kit/core';
   import { theme } from './theme';
+  import { autoDetectCodeLanguage } from './auto-language';
 
   type Props = {
     value: string;
@@ -41,7 +44,17 @@
       features: {
         [Crepe.Feature.Latex]: true,
       },
+      featureConfigs: {
+        [Crepe.Feature.CodeMirror]: {
+          extensions: [EditorView.lineWrapping],
+        },
+      },
     });
+
+    crepe.editor.config((ctx) => {
+      ctx.update(prosePluginsCtx, (plugins) => [...plugins, autoDetectCodeLanguage]);
+    });
+
     await crepe.create();
     crepe.on((listener) => {
       listener.markdownUpdated((_ctx, markdown) => {
@@ -81,5 +94,26 @@
     padding: 32px;
     min-height: 100%;
     outline: none;
+  }
+
+  .wysiwyg :global(milkdown-code-block) {
+    display: block;
+    width: 100%;
+  }
+
+  .wysiwyg :global(milkdown-code-block .cm-editor) {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .wysiwyg :global(milkdown-code-block .cm-scroller) {
+    overflow-x: hidden;
+  }
+
+  .wysiwyg :global(milkdown-code-block .cm-content),
+  .wysiwyg :global(milkdown-code-block .cm-line) {
+    white-space: pre-wrap !important;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 </style>

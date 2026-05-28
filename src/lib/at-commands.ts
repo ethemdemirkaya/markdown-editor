@@ -1,10 +1,12 @@
 import {
   autocompletion,
   snippetCompletion,
+  startCompletion,
   type CompletionContext,
   type CompletionResult,
   type Completion,
 } from '@codemirror/autocomplete';
+import { EditorView } from '@codemirror/view';
 import type { Extension } from '@codemirror/state';
 
 type CommandDef = {
@@ -62,9 +64,23 @@ function atCommandSource(ctx: CompletionContext): CompletionResult | null {
   };
 }
 
-export const atCommands: Extension = autocompletion({
-  override: [atCommandSource],
-  defaultKeymap: true,
-  closeOnBlur: true,
-  activateOnTyping: true,
+const triggerOnAt = EditorView.inputHandler.of((view, from, to, text) => {
+  if (text !== '@') return false;
+  view.dispatch({
+    changes: { from, to, insert: '@' },
+    selection: { anchor: from + 1 },
+    userEvent: 'input.type',
+  });
+  queueMicrotask(() => startCompletion(view));
+  return true;
 });
+
+export const atCommands: Extension = [
+  autocompletion({
+    override: [atCommandSource],
+    defaultKeymap: true,
+    closeOnBlur: true,
+    activateOnTyping: true,
+  }),
+  triggerOnAt,
+];
