@@ -6,7 +6,10 @@ import { flushNow } from './autosave';
 
 export async function installCloseGuard(): Promise<() => void> {
   const win = getCurrentWindow();
+  let detached = false;
+
   const unlisten = await win.onCloseRequested(async (event) => {
+    if (detached) return;
     const dirtyDocs = get(docs).filter(isDirty);
     if (dirtyDocs.length === 0) return;
 
@@ -18,10 +21,17 @@ export async function installCloseGuard(): Promise<() => void> {
       `Kaydedilmemiş değişiklikler var: ${names}\n\nYine de çıkmak istiyor musun?`,
       { title: 'Çıkışı onayla', kind: 'warning', okLabel: 'Çık', cancelLabel: 'İptal' },
     );
-    if (ok) {
+    if (!ok) return;
+
+    try {
       await flushNow();
-      await win.destroy();
+    } catch (err) {
+      console.error('Flush before close failed:', err);
     }
+
+    detached = true;
+    unlisten();
+    await win.close();
   });
 
   return unlisten;
