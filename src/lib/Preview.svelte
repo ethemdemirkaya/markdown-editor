@@ -1,14 +1,23 @@
 <script lang="ts">
-  import { marked } from 'marked';
+  import { Marked } from 'marked';
+  import { markedHighlight } from 'marked-highlight';
+  import hljs from 'highlight.js';
   import DOMPurify from 'dompurify';
 
   type Props = { source: string };
   let { source }: Props = $props();
 
-  marked.setOptions({
-    gfm: true,
-    breaks: false,
-  });
+  const marked = new Marked(
+    markedHighlight({
+      emptyLangClass: 'hljs',
+      langPrefix: 'hljs language-',
+      highlight(code, lang) {
+        const language = lang && hljs.getLanguage(lang) ? lang : 'plaintext';
+        return hljs.highlight(code, { language, ignoreIllegals: true }).value;
+      },
+    }),
+  );
+  marked.setOptions({ gfm: true, breaks: false });
 
   let html = $derived.by(() => {
     const raw = marked.parse(source, { async: false }) as string;

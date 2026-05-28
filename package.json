@@ -22,7 +22,9 @@
     "@tauri-apps/plugin-opener": "^2",
     "codemirror": "^6.0.2",
     "dompurify": "^3.4.7",
-    "marked": "^18.0.4"
+    "highlight.js": "^11.11.1",
+    "marked": "^18.0.4",
+    "marked-highlight": "^2.2.4"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.6",
