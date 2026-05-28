@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "Markdown Editor",
         "width": 1200,
         "height": 800
@@ -30,6 +31,14 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
+    ],
+    "fileAssociations": [
+      {
+        "ext": ["md", "markdown", "mdown", "mkd"],
+        "name": "Markdown",
+        "description": "Markdown document",
+        "role": "Editor"
+      }
     ]
   }
 }

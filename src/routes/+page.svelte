@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { initCliFileOpening } from '$lib/cli';
   import TabBar from '$lib/TabBar.svelte';
   import WysiwygEditor from '$lib/WysiwygEditor.svelte';
   import { theme, toggleTheme } from '$lib/theme';
@@ -158,7 +159,12 @@ $$
       createUntitled(WELCOME);
     }
     window.addEventListener('keydown', handleKeydown);
-    return () => window.removeEventListener('keydown', handleKeydown);
+    let unlistenCli: (() => void) | undefined;
+    void initCliFileOpening().then((u) => (unlistenCli = u));
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      unlistenCli?.();
+    };
   });
 </script>
 

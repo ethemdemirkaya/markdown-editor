@@ -5,6 +5,9 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "core:event:default",
+    "core:window:default",
+    "core:webview:default",
     "opener:default",
     "dialog:default",
     "fs:default",
