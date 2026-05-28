@@ -7,6 +7,7 @@
   import { bracketMatching, indentOnInput } from '@codemirror/language';
   import { themeExtension } from './cm-theme';
   import { theme } from './theme';
+  import { atCommands } from './at-commands';
 
   type Props = {
     value: string;
@@ -32,6 +33,7 @@
         bracketMatching(),
         indentOnInput(),
         markdown(),
+        atCommands,
         keymap.of([...defaultKeymap, ...historyKeymap]),
         EditorView.lineWrapping,
         themeCompartment.of(themeExtension(initialMode)),
