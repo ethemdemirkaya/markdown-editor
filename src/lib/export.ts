@@ -129,6 +129,41 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+export function renderPrintableHtml(source: string, title: string): string {
+  return renderStandaloneHtml(source, title, 'light').replace(
+    '</body>',
+    `<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),120));</script></body>`,
+  );
+}
+
+export function printPdfFromSource(source: string, title: string): void {
+  const html = renderPrintableHtml(source, title);
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute('aria-hidden', 'true');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '-9999px';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  iframe.srcdoc = html;
+
+  const cleanup = () => {
+    setTimeout(() => iframe.remove(), 500);
+  };
+
+  iframe.addEventListener('load', () => {
+    try {
+      iframe.contentWindow?.focus();
+    } catch (err) {
+      console.error('Print focus failed:', err);
+    }
+  });
+  window.addEventListener('focus', cleanup, { once: true });
+
+  document.body.appendChild(iframe);
+}
+
 export function renderStandaloneHtml(
   source: string,
   title: string,

@@ -11,7 +11,7 @@
   import FindReplace from '$lib/FindReplace.svelte';
   import { theme, toggleTheme } from '$lib/theme';
   import { openFile, saveToPath, chooseSavePath, chooseHtmlExportPath } from '$lib/file';
-  import { renderStandaloneHtml } from '$lib/export';
+  import { renderStandaloneHtml, printPdfFromSource } from '$lib/export';
   import {
     docs,
     activeDoc,
@@ -159,6 +159,13 @@ $$
     if (id) closeDoc(id);
   }
 
+  function handleExportPdf() {
+    const doc = get(activeDoc);
+    if (!doc) return;
+    const baseName = docName(doc).replace(/\.(md|markdown|txt)$/i, '');
+    printPdfFromSource(doc.content, baseName);
+  }
+
   async function handleExportHtml() {
     const doc = get(activeDoc);
     if (!doc) return;
@@ -209,6 +216,9 @@ $$
     } else if (key === 'h') {
       event.preventDefault();
       openFind(true);
+    } else if (key === 'p') {
+      event.preventDefault();
+      handleExportPdf();
     }
   }
 
@@ -260,7 +270,8 @@ $$
       {/if}
     </div>
     <button class="btn" type="button" onclick={handleSave} title="Kaydet (Ctrl/Cmd+S)">Kaydet</button>
-    <button class="btn" type="button" onclick={handleExportHtml} title="HTML olarak dışa aktar">Dışa Aktar</button>
+    <button class="btn" type="button" onclick={handleExportHtml} title="HTML olarak dışa aktar">HTML</button>
+    <button class="btn" type="button" onclick={handleExportPdf} title="PDF olarak yazdır (Ctrl/Cmd+P)">PDF</button>
     <button class="icon-btn" type="button" onclick={toggleOutline} title="İçindekiler paneli">≡</button>
     <button class="icon-btn" type="button" onclick={toggleTheme} title="Tema değiştir">
       {$theme === 'dark' ? '☀' : '☾'}
