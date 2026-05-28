@@ -5,7 +5,7 @@
   import crepeLight from '@milkdown/crepe/theme/classic.css?raw';
   import crepeDark from '@milkdown/crepe/theme/classic-dark.css?raw';
   import { EditorView } from '@codemirror/view';
-  import { editorViewCtx, prosePluginsCtx } from '@milkdown/kit/core';
+  import { editorViewCtx, editorViewOptionsCtx, prosePluginsCtx } from '@milkdown/kit/core';
   import { theme } from './theme';
   import { autoDetectCodeLanguage } from './auto-language';
 
@@ -64,6 +64,10 @@
 
     crepe.editor.config((ctx) => {
       ctx.update(prosePluginsCtx, (plugins) => [...plugins, autoDetectCodeLanguage]);
+      ctx.update(editorViewOptionsCtx, (prev) => ({
+        ...prev,
+        attributes: { ...(prev.attributes ?? {}), spellcheck: 'false', autocorrect: 'off' },
+      }));
     });
 
     await crepe.create();
