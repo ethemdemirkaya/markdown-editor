@@ -14,7 +14,7 @@ const KEY = 'markdown-editor:settings';
 
 const DEFAULTS: Settings = {
   atBehavior: 'new-paragraph',
-  outlineDefaultOpen: true,
+  outlineDefaultOpen: false,
   autosaveEnabled: true,
   confirmOnClose: true,
 };
