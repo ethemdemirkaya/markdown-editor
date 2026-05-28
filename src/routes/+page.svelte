@@ -4,7 +4,8 @@
   import Preview from '$lib/Preview.svelte';
   import TabBar from '$lib/TabBar.svelte';
   import { theme, toggleTheme } from '$lib/theme';
-  import { openFile, saveToPath, chooseSavePath, basename } from '$lib/file';
+  import { openFile, saveToPath, chooseSavePath, chooseHtmlExportPath, basename } from '$lib/file';
+  import { renderStandaloneHtml } from '$lib/export';
   import {
     docs,
     activeDoc,
@@ -112,6 +113,23 @@ Solda yaz, sağda **canlı önizleme**.
     createUntitled('');
   }
 
+  async function handleExportHtml() {
+    const doc = get(activeDoc);
+    if (!doc) return;
+    try {
+      const baseName = docName(doc).replace(/\.(md|markdown|txt)$/i, '');
+      const suggested = doc.path
+        ? doc.path.replace(/\.(md|markdown|txt)$/i, '.html')
+        : `${baseName}.html`;
+      const path = await chooseHtmlExportPath(suggested);
+      if (!path) return;
+      const html = renderStandaloneHtml(doc.content, baseName, get(theme));
+      await saveToPath(path, html);
+    } catch (err) {
+      console.error('Export failed:', err);
+    }
+  }
+
   function handleCloseActive() {
     const id = get(activeId);
     if (id) closeDoc(id);
@@ -160,6 +178,7 @@ Solda yaz, sağda **canlı önizleme**.
     <button class="btn" type="button" onclick={handleNew} title="Yeni (Ctrl/Cmd+N)">Yeni</button>
     <button class="btn" type="button" onclick={handleOpen} title="Aç (Ctrl/Cmd+O)">Aç</button>
     <button class="btn" type="button" onclick={handleSave} title="Kaydet (Ctrl/Cmd+S)">Kaydet</button>
+    <button class="btn" type="button" onclick={handleExportHtml} title="HTML olarak dışa aktar">Dışa Aktar</button>
     <button class="icon-btn" type="button" onclick={toggleTheme} title="Tema değiştir">
       {$theme === 'dark' ? '☀' : '☾'}
     </button>

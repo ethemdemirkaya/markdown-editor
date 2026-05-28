@@ -31,6 +31,17 @@ export async function chooseSavePath(suggested?: string): Promise<string | null>
   return path ?? null;
 }
 
+export async function chooseHtmlExportPath(suggested?: string): Promise<string | null> {
+  const path = await save({
+    filters: [
+      { name: 'HTML', extensions: ['html', 'htm'] },
+      { name: 'All Files', extensions: ['*'] },
+    ],
+    defaultPath: suggested,
+  });
+  return path ?? null;
+}
+
 export function basename(path: string): string {
   const norm = path.replace(/\\/g, '/');
   const idx = norm.lastIndexOf('/');
