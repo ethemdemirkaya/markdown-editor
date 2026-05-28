@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Marked } from 'marked';
   import { markedHighlight } from 'marked-highlight';
+  import markedKatex from 'marked-katex-extension';
   import hljs from 'highlight.js';
   import DOMPurify from 'dompurify';
 
@@ -17,6 +18,7 @@
       },
     }),
   );
+  marked.use(markedKatex({ throwOnError: false, nonStandard: true }));
   marked.setOptions({ gfm: true, breaks: false });
 
   let html = $derived.by(() => {

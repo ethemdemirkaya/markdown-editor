@@ -34,6 +34,20 @@ Solda yaz, sağda **canlı önizleme**.
 - \`Ctrl/Cmd+O\` — dosya aç
 - \`Ctrl/Cmd+S\` — kaydet
 - \`Ctrl/Cmd+Shift+S\` — farklı kaydet
+
+## Matematik
+
+Satır içi: $E = mc^2$, $a^2 + b^2 = c^2$.
+
+Blok:
+
+$$
+\\int_{-\\infty}^{\\infty} e^{-x^2} \\, dx = \\sqrt{\\pi}
+$$
+
+$$
+\\frac{\\partial f}{\\partial x} = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}
+$$
 `;
 
   let previewSource = $state('');

@@ -1,5 +1,6 @@
 <script lang="ts">
   import '../app.css';
+  import 'katex/dist/katex.min.css';
   import { onMount } from 'svelte';
   import { theme } from '$lib/theme';
   import hljsLight from 'highlight.js/styles/github.css?raw';

@@ -1,9 +1,11 @@
 import { Marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
+import markedKatex from 'marked-katex-extension';
 import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
 import hljsLight from 'highlight.js/styles/github.css?raw';
 import hljsDark from 'highlight.js/styles/github-dark.css?raw';
+import katexCss from 'katex/dist/katex.min.css?raw';
 
 const exporter = new Marked(
   markedHighlight({
@@ -15,6 +17,7 @@ const exporter = new Marked(
     },
   }),
 );
+exporter.use(markedKatex({ throwOnError: false, nonStandard: true }));
 exporter.setOptions({ gfm: true, breaks: false });
 
 const baseCss = `
@@ -142,6 +145,7 @@ export function renderStandaloneHtml(
 <title>${escapeHtml(title)}</title>
 <style>${baseCss}</style>
 <style>${hljsCss}</style>
+<style>${katexCss}</style>
 </head>
 <body>
 <article class="markdown-body">
