@@ -7,6 +7,8 @@
   import { openFileByPath } from '$lib/file';
   import TabBar from '$lib/TabBar.svelte';
   import WysiwygEditor from '$lib/WysiwygEditor.svelte';
+  import OutlinePanel from '$lib/OutlinePanel.svelte';
+  import FindReplace from '$lib/FindReplace.svelte';
   import { theme, toggleTheme } from '$lib/theme';
   import { openFile, saveToPath, chooseSavePath, chooseHtmlExportPath } from '$lib/file';
   import { renderStandaloneHtml } from '$lib/export';
@@ -110,6 +112,31 @@ $$
   }
 
   let recentOpen = $state(false);
+  let findOpen = $state(false);
+  let findShowReplace = $state(false);
+  let editorRev = $state(0);
+
+  function openFind(withReplace: boolean) {
+    findShowReplace = withReplace;
+    findOpen = true;
+  }
+
+  function setActiveContent(next: string) {
+    const id = get(activeId);
+    if (!id) return;
+    updateContent(id, next);
+    editorRev++;
+  }
+  let outlineOpen = $state(
+    typeof localStorage !== 'undefined' ? localStorage.getItem('markdown-editor:outline') !== 'closed' : true,
+  );
+
+  function toggleOutline() {
+    outlineOpen = !outlineOpen;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('markdown-editor:outline', outlineOpen ? 'open' : 'closed');
+    }
+  }
 
   async function openRecent(path: string) {
     recentOpen = false;
@@ -176,6 +203,12 @@ $$
     } else if (key === 'r') {
       event.preventDefault();
       recentOpen = !recentOpen;
+    } else if (key === 'f') {
+      event.preventDefault();
+      openFind(false);
+    } else if (key === 'h') {
+      event.preventDefault();
+      openFind(true);
     }
   }
 
@@ -228,6 +261,7 @@ $$
     </div>
     <button class="btn" type="button" onclick={handleSave} title="Kaydet (Ctrl/Cmd+S)">Kaydet</button>
     <button class="btn" type="button" onclick={handleExportHtml} title="HTML olarak dışa aktar">Dışa Aktar</button>
+    <button class="icon-btn" type="button" onclick={toggleOutline} title="İçindekiler paneli">≡</button>
     <button class="icon-btn" type="button" onclick={toggleTheme} title="Tema değiştir">
       {$theme === 'dark' ? '☀' : '☾'}
     </button>
@@ -237,9 +271,20 @@ $$
 
   <main class="main">
     {#if $activeDoc}
-      {#key $activeDoc.id}
+      {#key `${$activeDoc.id}:${editorRev}`}
         <WysiwygEditor value={$activeDoc.content} onChange={onEditorChange} />
       {/key}
+      {#if outlineOpen}
+        <OutlinePanel source={$activeDoc.content} />
+      {/if}
+      {#if findOpen}
+        <FindReplace
+          initialReplace={findShowReplace}
+          onClose={() => (findOpen = false)}
+          getSource={() => $activeDoc?.content ?? ''}
+          setSource={setActiveContent}
+        />
+      {/if}
     {:else}
       <div class="empty">Hiç sekme açık değil. <button class="btn" onclick={handleNew}>Yeni Sekme</button></div>
     {/if}
@@ -376,6 +421,7 @@ $$
     min-height: 0;
     min-width: 0;
     overflow: hidden;
+    position: relative;
   }
 
   .main > :global(*) {
