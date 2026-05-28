@@ -5,7 +5,7 @@
   import crepeLight from '@milkdown/crepe/theme/classic.css?raw';
   import crepeDark from '@milkdown/crepe/theme/classic-dark.css?raw';
   import { EditorView } from '@codemirror/view';
-  import { prosePluginsCtx } from '@milkdown/kit/core';
+  import { editorViewCtx, prosePluginsCtx } from '@milkdown/kit/core';
   import { theme } from './theme';
   import { autoDetectCodeLanguage } from './auto-language';
 
@@ -20,19 +20,30 @@
   let crepe: Crepe | null = null;
   let unsubTheme: (() => void) | null = null;
   let themeStyleEl: HTMLStyleElement | null = null;
-  let lastEmittedValue = value;
-  let suppressChange = false;
+
+  function onAtKeydown(e: KeyboardEvent) {
+    if (e.key !== '@' || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!crepe) return;
+    e.preventDefault();
+    crepe.editor.action((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      view.dispatch(view.state.tr.insertText('/'));
+      view.focus();
+    });
+  }
 
   onMount(() => {
     themeStyleEl = document.createElement('style');
     themeStyleEl.id = 'crepe-theme';
-    document.head.appendChild(themeStyleEl);
+    document.head.prepend(themeStyleEl);
 
     unsubTheme = theme.subscribe((mode) => {
       if (themeStyleEl) {
         themeStyleEl.textContent = mode === 'dark' ? crepeDark : crepeLight;
       }
     });
+
+    host.addEventListener('keydown', onAtKeydown, true);
 
     void init();
   });
@@ -58,14 +69,13 @@
     await crepe.create();
     crepe.on((listener) => {
       listener.markdownUpdated((_ctx, markdown) => {
-        if (suppressChange) return;
-        lastEmittedValue = markdown;
         onChange(markdown);
       });
     });
   }
 
   onDestroy(() => {
+    host?.removeEventListener('keydown', onAtKeydown, true);
     unsubTheme?.();
     themeStyleEl?.remove();
     themeStyleEl = null;
@@ -80,20 +90,23 @@
   .wysiwyg {
     height: 100%;
     width: 100%;
-    overflow: auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
     background: var(--bg-base);
   }
 
   .wysiwyg :global(.milkdown) {
-    height: 100%;
+    width: 100%;
+    background: transparent;
   }
 
   .wysiwyg :global(.ProseMirror) {
     max-width: 820px;
     margin: 0 auto;
-    padding: 32px;
-    min-height: 100%;
+    padding: 32px 32px 60vh;
     outline: none;
+    background: transparent;
   }
 
   .wysiwyg :global(milkdown-code-block) {
