@@ -7,7 +7,9 @@
   import { openFileByPath } from '$lib/file';
   import TabBar from '$lib/TabBar.svelte';
   import WysiwygEditor from '$lib/WysiwygEditor.svelte';
+  import SourceView from '$lib/SourceView.svelte';
   import OutlinePanel from '$lib/OutlinePanel.svelte';
+  import { viewMode, toggleViewMode } from '$lib/viewMode';
   import FindReplace from '$lib/FindReplace.svelte';
   import { theme, toggleTheme } from '$lib/theme';
   import { openFile, saveToPath, chooseSavePath, chooseHtmlExportPath } from '$lib/file';
@@ -219,6 +221,9 @@ $$
     } else if (key === 'p') {
       event.preventDefault();
       handleExportPdf();
+    } else if (key === 'e') {
+      event.preventDefault();
+      toggleViewMode();
     }
   }
 
@@ -272,6 +277,9 @@ $$
     <button class="btn" type="button" onclick={handleSave} title="Kaydet (Ctrl/Cmd+S)">Kaydet</button>
     <button class="btn" type="button" onclick={handleExportHtml} title="HTML olarak dışa aktar">HTML</button>
     <button class="btn" type="button" onclick={handleExportPdf} title="PDF olarak yazdır (Ctrl/Cmd+P)">PDF</button>
+    <button class="btn" type="button" onclick={toggleViewMode} title="Görünüm modu (Ctrl/Cmd+E)">
+      {$viewMode === 'source' ? 'WYSIWYG' : 'Kaynak'}
+    </button>
     <button class="icon-btn" type="button" onclick={toggleOutline} title="İçindekiler paneli">≡</button>
     <button class="icon-btn" type="button" onclick={toggleTheme} title="Tema değiştir">
       {$theme === 'dark' ? '☀' : '☾'}
@@ -282,8 +290,12 @@ $$
 
   <main class="main">
     {#if $activeDoc}
-      {#key `${$activeDoc.id}:${editorRev}`}
-        <WysiwygEditor value={$activeDoc.content} onChange={onEditorChange} />
+      {#key `${$activeDoc.id}:${editorRev}:${$viewMode}`}
+        {#if $viewMode === 'source'}
+          <SourceView value={$activeDoc.content} onChange={onEditorChange} />
+        {:else}
+          <WysiwygEditor value={$activeDoc.content} onChange={onEditorChange} />
+        {/if}
       {/key}
       {#if outlineOpen}
         <OutlinePanel source={$activeDoc.content} />

@@ -6,6 +6,7 @@
   import crepeDark from '@milkdown/crepe/theme/classic-dark.css?raw';
   import { EditorView } from '@codemirror/view';
   import { editorViewCtx, editorViewOptionsCtx, prosePluginsCtx } from '@milkdown/kit/core';
+  import { TextSelection } from '@milkdown/prose/state';
   import { theme } from './theme';
   import { autoDetectCodeLanguage } from './auto-language';
 
@@ -27,7 +28,34 @@
     e.preventDefault();
     crepe.editor.action((ctx) => {
       const view = ctx.get(editorViewCtx);
-      view.dispatch(view.state.tr.insertText('/'));
+      const { state } = view;
+      const { selection, schema } = state;
+      const head = selection.$from;
+      const parent = head.parent;
+
+      if (parent.type.name === 'code_block') return;
+
+      const isEmptyAtStart = parent.content.size === 0 && head.parentOffset === 0;
+
+      if (isEmptyAtStart) {
+        view.dispatch(state.tr.insertText('/'));
+        view.focus();
+        return;
+      }
+
+      const paragraphType = schema.nodes.paragraph;
+      if (!paragraphType) {
+        view.dispatch(state.tr.insertText('/'));
+        view.focus();
+        return;
+      }
+
+      const insertPos = head.after(head.depth);
+      const newPara = paragraphType.create(null, schema.text('/'));
+      let tr = state.tr.insert(insertPos, newPara);
+      const cursorPos = insertPos + 2;
+      tr = tr.setSelection(TextSelection.create(tr.doc, cursorPos));
+      view.dispatch(tr);
       view.focus();
     });
   }
