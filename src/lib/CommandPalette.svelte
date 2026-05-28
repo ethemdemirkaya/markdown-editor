@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PaletteCommand } from './commands';
+  import { t } from './i18n';
 
   type Props = {
     commands: PaletteCommand[];
@@ -91,7 +92,7 @@
     <input
       bind:this={inputEl}
       class="search"
-      placeholder="Komut ara veya çalıştır…"
+      placeholder={$t('palette.placeholder')}
       bind:value={query}
       onkeydown={onKey}
     />
@@ -111,13 +112,13 @@
           {#if cmd.shortcut}<span class="shortcut">{cmd.shortcut}</span>{/if}
         </button>
       {:else}
-        <div class="empty">Eşleşme yok</div>
+        <div class="empty">{$t('palette.empty')}</div>
       {/each}
     </div>
     <footer class="hint">
-      <span><kbd>↑</kbd><kbd>↓</kbd> gez</span>
-      <span><kbd>↵</kbd> çalıştır</span>
-      <span><kbd>Esc</kbd> kapat</span>
+      <span><kbd>↑</kbd><kbd>↓</kbd> {$t('palette.hint.nav')}</span>
+      <span><kbd>↵</kbd> {$t('palette.hint.run')}</span>
+      <span><kbd>Esc</kbd> {$t('palette.hint.close')}</span>
     </footer>
   </div>
 </div>

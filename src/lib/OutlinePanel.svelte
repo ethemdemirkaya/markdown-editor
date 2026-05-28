@@ -1,5 +1,6 @@
 <script lang="ts">
   import { parseOutline, scrollToHeading } from './outline';
+  import { t } from './i18n';
 
   type Props = { source: string };
   let { source }: Props = $props();
@@ -8,9 +9,9 @@
 </script>
 
 <aside class="outline">
-  <header class="outline-header">İçindekiler</header>
+  <header class="outline-header">{$t('outline.title')}</header>
   {#if items.length === 0}
-    <div class="outline-empty">Başlık yok</div>
+    <div class="outline-empty">{$t('outline.empty')}</div>
   {:else}
     <nav class="outline-list">
       {#each items as item (item.index)}

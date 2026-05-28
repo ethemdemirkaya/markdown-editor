@@ -9,6 +9,7 @@
   import { TextSelection } from '@milkdown/prose/state';
   import { theme } from './theme';
   import { autoDetectCodeLanguage } from './auto-language';
+  import { githubAlertDecoration } from './github-alerts';
   import { getSettings } from './settings';
   import InlineBlockMenu from './InlineBlockMenu.svelte';
 
@@ -167,7 +168,7 @@
     });
 
     crepe.editor.config((ctx) => {
-      ctx.update(prosePluginsCtx, (plugins) => [...plugins, autoDetectCodeLanguage]);
+      ctx.update(prosePluginsCtx, (plugins) => [...plugins, autoDetectCodeLanguage, githubAlertDecoration]);
       ctx.update(editorViewOptionsCtx, (prev) => ({
         ...prev,
         attributes: { ...(prev.attributes ?? {}), spellcheck: 'false', autocorrect: 'off' },

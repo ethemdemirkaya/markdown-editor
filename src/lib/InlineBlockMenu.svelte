@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { t } from './i18n';
+
   type Item = {
     key: string;
-    label: string;
+    labelKey: string;
     desc?: string;
     snippet: string;
     cursorOffset?: number;
@@ -18,23 +20,23 @@
   let { x, y, onPick, onClose }: Props = $props();
 
   const ITEMS: Item[] = [
-    { key: 'code', label: 'Kod bloğu', desc: '```dil ... ```', snippet: '\n```\n\n```\n', cursorOffset: 5, asNewBlock: true },
-    { key: 'inline-code', label: 'Satır içi kod', desc: '`metin`', snippet: '``', cursorOffset: 1 },
-    { key: 'bold', label: 'Kalın', desc: '**metin**', snippet: '****', cursorOffset: 2 },
-    { key: 'italic', label: 'Eğik', desc: '*metin*', snippet: '**', cursorOffset: 1 },
-    { key: 'h1', label: 'Başlık 1', snippet: '\n# ', asNewBlock: true },
-    { key: 'h2', label: 'Başlık 2', snippet: '\n## ', asNewBlock: true },
-    { key: 'h3', label: 'Başlık 3', snippet: '\n### ', asNewBlock: true },
-    { key: 'list', label: 'Madde listesi', snippet: '\n- ', asNewBlock: true },
-    { key: 'numbered', label: 'Numaralı liste', snippet: '\n1. ', asNewBlock: true },
-    { key: 'task', label: 'Görev listesi', snippet: '\n- [ ] ', asNewBlock: true },
-    { key: 'quote', label: 'Alıntı', snippet: '\n> ', asNewBlock: true },
-    { key: 'hr', label: 'Yatay çizgi', snippet: '\n---\n', asNewBlock: true },
-    { key: 'math', label: 'Matematik bloğu', snippet: '\n$$\n\n$$\n', cursorOffset: 4, asNewBlock: true },
-    { key: 'inline-math', label: 'Satır içi matematik', snippet: '$$', cursorOffset: 1 },
-    { key: 'table', label: 'Tablo', snippet: '\n| A | B |\n| --- | --- |\n| 1 | 2 |\n', asNewBlock: true },
-    { key: 'link', label: 'Bağlantı', snippet: '[](url)', cursorOffset: 1 },
-    { key: 'image', label: 'Görsel', snippet: '![](url)', cursorOffset: 2 },
+    { key: 'code', labelKey: 'block.code', desc: '```lang … ```', snippet: '\n```\n\n```\n', cursorOffset: 5, asNewBlock: true },
+    { key: 'inline-code', labelKey: 'block.inline-code', desc: '`text`', snippet: '``', cursorOffset: 1 },
+    { key: 'bold', labelKey: 'block.bold', desc: '**text**', snippet: '****', cursorOffset: 2 },
+    { key: 'italic', labelKey: 'block.italic', desc: '*text*', snippet: '**', cursorOffset: 1 },
+    { key: 'h1', labelKey: 'block.h1', snippet: '\n# ', asNewBlock: true },
+    { key: 'h2', labelKey: 'block.h2', snippet: '\n## ', asNewBlock: true },
+    { key: 'h3', labelKey: 'block.h3', snippet: '\n### ', asNewBlock: true },
+    { key: 'list', labelKey: 'block.list', snippet: '\n- ', asNewBlock: true },
+    { key: 'numbered', labelKey: 'block.numbered', snippet: '\n1. ', asNewBlock: true },
+    { key: 'task', labelKey: 'block.task', snippet: '\n- [ ] ', asNewBlock: true },
+    { key: 'quote', labelKey: 'block.quote', snippet: '\n> ', asNewBlock: true },
+    { key: 'hr', labelKey: 'block.hr', snippet: '\n---\n', asNewBlock: true },
+    { key: 'math', labelKey: 'block.math', snippet: '\n$$\n\n$$\n', cursorOffset: 4, asNewBlock: true },
+    { key: 'inline-math', labelKey: 'block.inline-math', snippet: '$$', cursorOffset: 1 },
+    { key: 'table', labelKey: 'block.table', snippet: '\n| A | B |\n| --- | --- |\n| 1 | 2 |\n', asNewBlock: true },
+    { key: 'link', labelKey: 'block.link', snippet: '[](url)', cursorOffset: 1 },
+    { key: 'image', labelKey: 'block.image', snippet: '![](url)', cursorOffset: 2 },
   ];
 
   let filter = $state('');
@@ -44,7 +46,8 @@
     ITEMS.filter((it) => {
       if (!filter) return true;
       const f = filter.toLowerCase();
-      return it.label.toLowerCase().includes(f) || it.key.toLowerCase().includes(f);
+      const localized = $t(it.labelKey).toLowerCase();
+      return localized.includes(f) || it.key.toLowerCase().includes(f);
     }),
   );
 
@@ -102,11 +105,11 @@
         onmouseenter={() => (activeIndex = idx)}
         onclick={() => pick(idx)}
       >
-        <span class="label">{item.label}</span>
+        <span class="label">{$t(item.labelKey)}</span>
         {#if item.desc}<span class="desc">{item.desc}</span>{/if}
       </button>
     {:else}
-      <div class="empty">Eşleşme yok</div>
+      <div class="empty">{$t('palette.empty')}</div>
     {/each}
   </div>
 </div>

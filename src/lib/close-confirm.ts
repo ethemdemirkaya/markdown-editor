@@ -5,6 +5,7 @@ import { get } from 'svelte/store';
 import { docs, isDirty } from './documents';
 import { flushNow } from './autosave';
 import { getSettings } from './settings';
+import { tNow } from './i18n';
 
 async function forceQuit(): Promise<void> {
   try {
@@ -34,8 +35,13 @@ export async function installCloseGuard(): Promise<() => void> {
       .map((d) => (d.path ? d.path.split(/[\\/]/).pop() : `Untitled-${d.untitledIndex}.md`))
       .join(', ');
     const ok = await confirm(
-      `Kaydedilmemiş değişiklikler var: ${names}\n\nYine de çıkmak istiyor musun?`,
-      { title: 'Çıkışı onayla', kind: 'warning', okLabel: 'Çık', cancelLabel: 'İptal' },
+      tNow('close.body', { files: names }),
+      {
+        title: tNow('close.title'),
+        kind: 'warning',
+        okLabel: tNow('close.ok'),
+        cancelLabel: tNow('close.cancel'),
+      },
     );
     if (!ok) return;
 

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { t } from './i18n';
+
   type Props = {
     initialReplace: boolean;
     onClose: () => void;
@@ -124,31 +126,31 @@
   <div class="row">
     <input
       class="text-input"
-      placeholder="Bul"
+      placeholder={$t('find.placeholder')}
       bind:value={findText}
       onkeydown={onKey}
       autofocus
     />
-    <button class="seg" type="button" class:active={caseSensitive} onclick={() => (caseSensitive = !caseSensitive)} title="Büyük/küçük harf duyarlı">Aa</button>
-    <button class="seg" type="button" class:active={useRegex} onclick={() => (useRegex = !useRegex)} title="Regex">.*</button>
+    <button class="seg" type="button" class:active={caseSensitive} onclick={() => (caseSensitive = !caseSensitive)} title={$t('find.case')}>Aa</button>
+    <button class="seg" type="button" class:active={useRegex} onclick={() => (useRegex = !useRegex)} title={$t('find.regex')}>.*</button>
     <span class="count">
       {#if findText}{matchCount === 0 ? 0 : currentIndex + 1} / {matchCount}{/if}
     </span>
-    <button class="icon" type="button" onclick={previous} title="Önceki (Shift+Enter)">↑</button>
-    <button class="icon" type="button" onclick={next} title="Sonraki (Enter)">↓</button>
-    <button class="icon" type="button" onclick={() => (showReplace = !showReplace)} title="Değiştir'i aç/kapat">↹</button>
-    <button class="icon" type="button" onclick={onClose} title="Kapat (Esc)">×</button>
+    <button class="icon" type="button" onclick={previous} title={$t('find.prev')}>↑</button>
+    <button class="icon" type="button" onclick={next} title={$t('find.next')}>↓</button>
+    <button class="icon" type="button" onclick={() => (showReplace = !showReplace)} title={$t('find.toggle-replace')}>↹</button>
+    <button class="icon" type="button" onclick={onClose} title={$t('find.close')}>×</button>
   </div>
   {#if showReplace}
     <div class="row">
       <input
         class="text-input"
-        placeholder="Değiştir"
+        placeholder={$t('find.replace.placeholder')}
         bind:value={replaceText}
         onkeydown={onKey}
       />
-      <button class="btn" type="button" onclick={replaceOne}>Değiştir</button>
-      <button class="btn" type="button" onclick={replaceAll}>Tümünü değiştir</button>
+      <button class="btn" type="button" onclick={replaceOne}>{$t('find.replace-one')}</button>
+      <button class="btn" type="button" onclick={replaceAll}>{$t('find.replace-all')}</button>
     </div>
   {/if}
 </div>

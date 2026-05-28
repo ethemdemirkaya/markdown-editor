@@ -12,96 +12,102 @@ Built with **Tauri 2** + **Svelte 5** + **TypeScript** + **Milkdown Crepe**.
 [![Release](https://img.shields.io/github/v/release/ethemdemirkaya/markdown-editor)](https://github.com/ethemdemirkaya/markdown-editor/releases)
 [![Downloads](https://img.shields.io/github/downloads/ethemdemirkaya/markdown-editor/total)](https://github.com/ethemdemirkaya/markdown-editor/releases)
 
-[İndir](https://github.com/ethemdemirkaya/markdown-editor/releases/latest) ·
-[Özellikler](#özellikler) ·
-[Kısayollar](#kısayollar) ·
-[Geliştirme](#geliştirme)
+**English** · [Türkçe](README.tr.md)
+
+[Download](https://github.com/ethemdemirkaya/markdown-editor/releases/latest) ·
+[Features](#features) ·
+[Shortcuts](#shortcuts) ·
+[Development](#development)
 
 </div>
 
 ---
 
-## Neden bu editör?
+## Why this editor?
 
-- **WYSIWYG** — yazdığın gibi görünür; kod bloğu, başlık, liste, tablo, matematik anında render edilir.
-- **Native masaüstü uygulaması** — Electron değil, Tauri. Bundle boyutu **~5 MB**, RAM kullanımı çok düşük, native pencere ve OS entegrasyonu.
-- **Sıfır veri kaybı** — otomatik disk kaydı + oturum snapshot'ı; uygulama çöker veya kapanırsa tüm açık sekmeler aynen geri yüklenir.
-- **Ayarlanabilir** — `@` davranışı, autosave, içindekiler paneli, kapatma onayı tek bir Ayarlar panelinden açılıp kapanır.
-- **Kaynak görünümü** — `Ctrl+E` ile WYSIWYG ↔ ham markdown arasında geçiş, gerçek `#`, `**`, ` ``` ` syntax'ını gör.
+- **WYSIWYG** — what you type is what you see; code blocks, headings, lists, tables and math render instantly.
+- **Native desktop app** — not Electron, Tauri. Bundle size **~5 MB**, low memory footprint, native window and OS integration.
+- **Zero data loss** — automatic disk save + session snapshot; if the app crashes or you close it, all open tabs are restored next launch.
+- **Configurable** — `@` behavior, autosave, outline panel, close confirmation — toggle each from a single Settings panel.
+- **Source view** — toggle between WYSIWYG ↔ raw markdown with `Ctrl+E` to see actual `#`, `**`, ` ``` ` syntax.
+- **Multilingual UI** — pick your language from Settings (English, Türkçe, Deutsch, Français, Español).
 
-## Özellikler
+## Features
 
-### Düzenleme
+### Editing
 - WYSIWYG markdown — Milkdown Crepe (ProseMirror)
-- Source görünümü toggle (`Ctrl+E`) — ham markdown'ı edit et
-- **`@` ile blok menüsü** — iki seçenek:
-  - **Yeni paragraph** (default): standart slash menüsü davranışı
-  - **Inline popup**: cursor pozisyonunda Notion-benzeri menü, klavye filtresiyle 17 öğe
-- KaTeX matematik — satır içi `$...$` ve blok `$$...$$`
-- Kod blokları — **otomatik dil algılama** (highlight.js), satır kaydırma, kopyala butonu
-- Drag-handle ile blokları yeniden sırala
-- GFM desteği — tablolar, görev listeleri, çizgili metin
+- Source view toggle (`Ctrl+E`) — edit the raw markdown directly
+- **Block menu via `@`** — two modes:
+  - **New paragraph** (default): standard slash-menu behavior
+  - **Inline popup**: Notion-style menu at the cursor with keyboard filter, 17 items
+- KaTeX math — inline `$...$` and block `$$...$$`
+- Code blocks — **automatic language detection** (highlight.js), line wrapping, copy button
+- **GitHub Alerts** — `> [!NOTE]` / `[!TIP]` / `[!IMPORTANT]` / `[!WARNING]` / `[!CAUTION]` rendered both in WYSIWYG and exports
+- Drag-handle to reorder blocks
+- GFM — tables, task lists, strikethrough
 
-### Dosya & Oturum
-- Aç / Kaydet / Farklı kaydet — native dialog
-- **Otomatik kayıt** — 1.5 sn debounced, sadece yola sahip dosyalar
-- **Oturum kurtarma** — tüm açık sekmeler localStorage snapshot'ında; yeniden açılışta restore
-- **Çoklu sekme** — sınırsız, sekmeler arası `Ctrl+Tab`
-- **Son 10 dosya** menüsü (`Ctrl+R`)
-- **Kapatma onayı** — kaydedilmemiş değişiklikler varken uyarı
-- **OS ilişkilendirmesi** — `.md` / `.markdown` / `.mdown` / `.mkd` çift tıkla doğrudan açılır
-- **Single-instance** — birden fazla dosyaya çift tıklasan yeni sekme olarak aynı pencerede açılır
+### Files & Session
+- Open / Save / Save As — native dialog
+- **Autosave** — 1.5s debounced, only persisted files
+- **Session restore** — all open tabs in a localStorage snapshot; restored on relaunch
+- **Multi-tab** — unlimited, `Ctrl+Tab` to cycle
+- **Recent 10 files** menu (`Ctrl+R`)
+- **Close confirmation** — warning when unsaved changes exist
+- **OS file association** — double-clicking `.md` / `.markdown` / `.mdown` / `.mkd` opens directly
+- **Single-instance** — double-clicking more files opens new tabs in the same window
 
-### Navigasyon
-- **İçindekiler paneli** — başlık ağacı, tek tıkla scroll
-- **Bul / Değiştir** — regex, case-sensitive, eşleşme sayacı (`Ctrl+F` / `Ctrl+H`)
+### Navigation
+- **Outline panel** — heading tree, click to jump
+- **Find / Replace** — regex, case-sensitive, match counter (`Ctrl+F` / `Ctrl+H`)
+- **Command Palette** (`Ctrl+Shift+P`) — fuzzy-searchable list of every action, every open tab, and every recent file
 
-### Görünüm
-- Dark / Light tema, tercih kalıcı
-- Spellcheck kapalı (Türkçe metinlerde kırmızı çizgi yok)
-- Modern, gradyansız ikon
+### Appearance
+- Dark / Light theme, persistent preference
+- Spellcheck disabled by default (no red wavy lines on non-English text)
+- Modern, gradient-free icon
 
-### Dışa aktarım
-- **HTML** — self-contained, KaTeX + highlight.js CSS gömülü
-- **PDF** — temiz iframe + browser print dialog (Chrome kalitesinde)
+### Export
+- **HTML** — self-contained, KaTeX + highlight.js CSS embedded
+- **PDF** — clean iframe + browser print dialog (Chrome-quality output)
 
-## Kısayollar
+## Shortcuts
 
-| Kısayol | İşlev |
+| Shortcut | Action |
 |---|---|
-| `Ctrl/Cmd + N` veya `+T` | Yeni sekme |
-| `Ctrl/Cmd + W` | Aktif sekmeyi kapat |
-| `Ctrl/Cmd + Tab` | Sıradaki sekme |
-| `Ctrl/Cmd + O` | Dosya aç |
-| `Ctrl/Cmd + S` | Kaydet |
-| `Ctrl/Cmd + Shift + S` | Farklı kaydet |
-| `Ctrl/Cmd + R` | Son dosyalar menüsü |
-| `Ctrl/Cmd + F` | Bul |
-| `Ctrl/Cmd + H` | Değiştir |
-| `Ctrl/Cmd + P` | PDF olarak yazdır |
-| `Ctrl/Cmd + E` | Source / WYSIWYG toggle |
-| `@` | Editörde blok menüsünü aç |
-| `Esc` | Aktif panel / menüyü kapat |
+| `Ctrl/Cmd + N` or `+T` | New tab |
+| `Ctrl/Cmd + W` | Close active tab |
+| `Ctrl/Cmd + Tab` | Next tab |
+| `Ctrl/Cmd + O` | Open file |
+| `Ctrl/Cmd + S` | Save |
+| `Ctrl/Cmd + Shift + S` | Save as |
+| `Ctrl/Cmd + R` | Recent files menu |
+| `Ctrl/Cmd + F` | Find |
+| `Ctrl/Cmd + H` | Replace |
+| `Ctrl/Cmd + P` | Print as PDF |
+| `Ctrl/Cmd + Shift + P` | Command palette |
+| `Ctrl/Cmd + E` | Toggle source / WYSIWYG |
+| `@` | Open block menu |
+| `Esc` | Close active panel / menu |
 
-## Kurulum
+## Install
 
-**[Releases sayfasından](https://github.com/ethemdemirkaya/markdown-editor/releases/latest)** son sürümü indir:
+Download the latest version from the **[Releases page](https://github.com/ethemdemirkaya/markdown-editor/releases/latest)**:
 
-| Platform | Paket |
+| Platform | Package |
 |---|---|
-| Windows (kullanıcı bazlı) | `Markdown Editor_X.Y.Z_x64-setup.exe` (NSIS, küçük, önerilen) |
-| Windows (kurumsal) | `Markdown Editor_X.Y.Z_x64_en-US.msi` (MSI, GPO dağıtımı için) |
+| Windows (per-user) | `Markdown Editor_X.Y.Z_x64-setup.exe` (NSIS, small, recommended) |
+| Windows (enterprise) | `Markdown Editor_X.Y.Z_x64_en-US.msi` (MSI, for GPO deployment) |
 
-Kurulum sırasında `.md` / `.markdown` / `.mdown` / `.mkd` dosya ilişkilendirmesi otomatik kurulur.
+File associations for `.md` / `.markdown` / `.mdown` / `.mkd` are installed automatically.
 
-## Geliştirme
+## Development
 
-### Gereksinimler
+### Requirements
 - [Node.js](https://nodejs.org/) 22+
 - [Rust](https://www.rust-lang.org/tools/install) (stable toolchain)
-- Windows için [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), Linux için `webkit2gtk` + build-essential, macOS için Xcode CLI
+- Windows: [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) · Linux: `webkit2gtk` + build-essential · macOS: Xcode CLI
 
-### Çalıştırma
+### Run
 
 ```bash
 git clone https://github.com/ethemdemirkaya/markdown-editor.git
@@ -111,76 +117,78 @@ npm run tauri dev      # hot-reload development
 npm run tauri build    # production build (MSI / NSIS / .dmg / .deb / .AppImage)
 ```
 
-### İkon yeniden üretme
+### Regenerating icons
 
-İkon yalnızca [src-tauri/icons/icon.svg](src-tauri/icons/icon.svg) içinde tanımlı. Değiştirmek için:
+The icon is defined only in [src-tauri/icons/icon.svg](src-tauri/icons/icon.svg). To regenerate all variants:
 
 ```bash
 node scripts/generate-icons.mjs           # SVG → PNG + NSIS BMPs
 npx @tauri-apps/cli icon src-tauri/icons/icon-source.png -o src-tauri/icons
 ```
 
-## Proje yapısı
+## Project structure
 
 ```
 markdown-editor/
 ├─ src/                       # Svelte 5 frontend
 │  ├─ lib/
-│  │  ├─ WysiwygEditor.svelte   # Milkdown Crepe sarmalayıcı
-│  │  ├─ SourceView.svelte      # Kaynak (textarea) görünüm
-│  │  ├─ TabBar.svelte          # Sekme barı
-│  │  ├─ OutlinePanel.svelte    # İçindekiler
-│  │  ├─ FindReplace.svelte     # Bul / Değiştir overlay
-│  │  ├─ InlineBlockMenu.svelte # `@` inline popup
-│  │  ├─ SettingsPanel.svelte   # ⚙ Ayarlar modali
+│  │  ├─ WysiwygEditor.svelte   # Milkdown Crepe wrapper
+│  │  ├─ SourceView.svelte      # Source (textarea) view
+│  │  ├─ TabBar.svelte          # Tab strip
+│  │  ├─ OutlinePanel.svelte    # Outline
+│  │  ├─ FindReplace.svelte     # Find / Replace overlay
+│  │  ├─ InlineBlockMenu.svelte # Inline `@` popup
+│  │  ├─ SettingsPanel.svelte   # ⚙ Settings modal
+│  │  ├─ CommandPalette.svelte  # Ctrl+Shift+P palette
 │  │  ├─ autosave.ts            # Debounced disk + snapshot
 │  │  ├─ documents.ts           # Multi-tab doc state
 │  │  ├─ export.ts              # HTML / PDF self-contained
 │  │  ├─ cli.ts                 # CLI args + open-files event
 │  │  ├─ auto-language.ts       # ProseMirror plugin: hljs auto-detect
+│  │  ├─ github-alerts.ts       # Marked extension + PM decoration
 │  │  ├─ theme.ts               # Dark/light store
 │  │  ├─ settings.ts            # Settings store
+│  │  ├─ i18n.ts                # Locale store + translations
 │  │  └─ ...
-│  └─ routes/+page.svelte       # Ana sayfa
+│  └─ routes/+page.svelte       # Main page
 ├─ src-tauri/                 # Rust backend
 │  ├─ src/lib.rs                # Plugin init + force_exit + get_startup_files
 │  ├─ icons/
-│  │  ├─ icon.svg               # Tek kaynak ikon
+│  │  ├─ icon.svg               # Single icon source
 │  │  ├─ nsis-header.bmp        # Installer banner
 │  │  └─ nsis-sidebar.bmp       # Installer welcome image
 │  ├─ tauri.conf.json           # Bundle / fileAssociations / NSIS config
-│  └─ capabilities/default.json # Tauri izinleri
+│  └─ capabilities/default.json # Tauri permissions
 ├─ scripts/
-│  └─ generate-icons.mjs        # SVG → PNG + BMP üretici
+│  └─ generate-icons.mjs        # SVG → PNG + BMP generator
 └─ REQUIREMENTS.md
 ```
 
-## Teknoloji yığını
+## Tech stack
 
-| Katman | Kütüphane |
+| Layer | Library |
 |---|---|
 | Runtime | [Tauri 2](https://tauri.app/) (Rust) |
 | Frontend | [Svelte 5 + SvelteKit](https://svelte.dev/) (adapter-static, SPA), TypeScript, Vite |
 | WYSIWYG | [Milkdown Crepe](https://milkdown.dev/) (ProseMirror) |
 | Markdown render | [marked](https://marked.js.org/) + [DOMPurify](https://github.com/cure53/DOMPurify) |
 | Syntax highlight | [highlight.js](https://highlightjs.org/) |
-| Matematik | [KaTeX](https://katex.org/) |
-| Tauri eklentileri | `plugin-dialog`, `plugin-fs`, `plugin-opener`, `plugin-single-instance` |
+| Math | [KaTeX](https://katex.org/) |
+| Tauri plugins | `plugin-dialog`, `plugin-fs`, `plugin-opener`, `plugin-single-instance` |
 
-## Yol haritası
+## Roadmap
 
-- [ ] Görsel yapıştırma & drag-drop (clipboard → assets klasörü)
-- [ ] Klasör / workspace sidebar (file tree)
-- [ ] Mermaid diyagram desteği
-- [ ] Quick Command Palette (`Ctrl+Shift+P`)
-- [ ] Wiki-link `[[Note]]` + backlinks paneli
-- [ ] AI yardımı (özet, çeviri) — Crepe `Feature.AI`
-- [ ] macOS & Linux release binary'leri
+- [ ] Paste & drag-drop images (clipboard → assets folder)
+- [ ] Workspace / folder sidebar (file tree)
+- [ ] Mermaid diagram support
+- [ ] Wiki-link `[[Note]]` + backlinks panel
+- [ ] AI assistance (summarize, translate) — Crepe `Feature.AI`
+- [ ] macOS & Linux release binaries
 
-## Katkı
+## Contributing
 
-Pull request'ler ve issue'lar açıktır. Büyük değişiklikler için önce bir issue açarak tartışalım.
+Pull requests and issues are welcome. For large changes please open an issue first to discuss.
 
-## Lisans
+## License
 
 [MIT](LICENSE) © Ethem Demirkaya

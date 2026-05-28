@@ -1,5 +1,6 @@
 <script lang="ts">
   import { settings, setSetting, type AtBehavior } from './settings';
+  import { locale, LOCALE_LABELS, SUPPORTED_LOCALES, t, type Locale } from './i18n';
 
   type Props = { onClose: () => void };
   let { onClose }: Props = $props();
@@ -22,39 +23,54 @@
   class="backdrop"
   role="dialog"
   aria-modal="true"
-  aria-label="Ayarlar"
+  aria-label={$t('settings.title')}
   onclick={onBackdropClick}
 >
   <div class="panel">
     <header class="panel-header">
-      <h2>Ayarlar</h2>
-      <button class="close" type="button" onclick={onClose} aria-label="Kapat">×</button>
+      <h2>{$t('settings.title')}</h2>
+      <button class="close" type="button" onclick={onClose} aria-label={$t('settings.close')}>×</button>
     </header>
 
     <section class="group">
       <div class="row">
         <div class="label">
-          <div class="title">@ tuşu davranışı</div>
-          <div class="desc">
-            Editörde <code>@</code> yazıldığında blok ekleme menüsünün nasıl açılacağını seçin.
-          </div>
+          <div class="title">{$t('settings.language.title')}</div>
+          <div class="desc">{$t('settings.language.desc')}</div>
         </div>
         <div class="control">
           <select
-            value={$settings.atBehavior}
-            onchange={(e) => setSetting('atBehavior', (e.currentTarget as HTMLSelectElement).value as AtBehavior)}
+            value={$locale}
+            onchange={(e) => locale.set((e.currentTarget as HTMLSelectElement).value as Locale)}
           >
-            <option value="inline">Aynı satırda menü</option>
-            <option value="new-paragraph">Yeni paragraf oluştur</option>
-            <option value="disabled">Kapalı (sadece @ yazılır)</option>
+            {#each SUPPORTED_LOCALES as loc}
+              <option value={loc}>{LOCALE_LABELS[loc]}</option>
+            {/each}
           </select>
         </div>
       </div>
 
       <div class="row">
         <div class="label">
-          <div class="title">İçindekiler paneli</div>
-          <div class="desc">Açılışta otomatik gösterilsin mi?</div>
+          <div class="title">{$t('settings.at.title')}</div>
+          <div class="desc">{$t('settings.at.desc')}</div>
+        </div>
+        <div class="control">
+          <select
+            value={$settings.atBehavior}
+            onchange={(e) => setSetting('atBehavior', (e.currentTarget as HTMLSelectElement).value as AtBehavior)}
+          >
+            <option value="inline">{$t('settings.at.inline')}</option>
+            <option value="new-paragraph">{$t('settings.at.new-paragraph')}</option>
+            <option value="disabled">{$t('settings.at.disabled')}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">
+          <div class="title">{$t('settings.outline.title')}</div>
+          <div class="desc">{$t('settings.outline.desc')}</div>
         </div>
         <div class="control">
           <label class="switch">
@@ -70,8 +86,8 @@
 
       <div class="row">
         <div class="label">
-          <div class="title">Otomatik kayıt</div>
-          <div class="desc">Yazıldıkça kayıtlı dosyalar diske yazılsın.</div>
+          <div class="title">{$t('settings.autosave.title')}</div>
+          <div class="desc">{$t('settings.autosave.desc')}</div>
         </div>
         <div class="control">
           <label class="switch">
@@ -87,8 +103,8 @@
 
       <div class="row">
         <div class="label">
-          <div class="title">Kapatma onayı</div>
-          <div class="desc">Kaydedilmemiş sekme varken çıkışta uyar.</div>
+          <div class="title">{$t('settings.confirm.title')}</div>
+          <div class="desc">{$t('settings.confirm.desc')}</div>
         </div>
         <div class="control">
           <label class="switch">
@@ -187,13 +203,6 @@
     font-size: 12px;
     color: var(--text-muted);
     margin-top: 2px;
-  }
-
-  .label code {
-    background: var(--code-inline-bg);
-    padding: 1px 4px;
-    border-radius: 3px;
-    font-size: 0.9em;
   }
 
   .control select {

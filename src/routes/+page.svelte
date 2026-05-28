@@ -15,6 +15,7 @@
   import { settings } from '$lib/settings';
   import CommandPalette from '$lib/CommandPalette.svelte';
   import type { PaletteCommand } from '$lib/commands';
+  import { t } from '$lib/i18n';
   import { theme, toggleTheme } from '$lib/theme';
   import { openFile, saveToPath, chooseSavePath, chooseHtmlExportPath } from '$lib/file';
   import { renderStandaloneHtml, printPdfFromSource } from '$lib/export';
@@ -158,38 +159,31 @@ $$
   }
 
   let paletteCommands = $derived<PaletteCommand[]>([
-    // Dosya
-    { id: 'file.new', group: 'Dosya', label: 'Yeni sekme', shortcut: 'Ctrl+N', run: handleNew },
-    { id: 'file.open', group: 'Dosya', label: 'Dosya aç…', shortcut: 'Ctrl+O', run: handleOpen },
-    { id: 'file.save', group: 'Dosya', label: 'Kaydet', shortcut: 'Ctrl+S', run: handleSave },
-    { id: 'file.save-as', group: 'Dosya', label: 'Farklı kaydet…', shortcut: 'Ctrl+Shift+S', run: handleSaveAs },
-    { id: 'file.close', group: 'Dosya', label: 'Aktif sekmeyi kapat', shortcut: 'Ctrl+W', run: handleCloseActive },
-    // Görünüm
-    { id: 'view.outline', group: 'Görünüm', label: outlineOpen ? 'İçindekiler panelini gizle' : 'İçindekiler panelini göster', run: toggleOutline },
-    { id: 'view.source', group: 'Görünüm', label: $viewMode === 'source' ? 'WYSIWYG görünüme dön' : 'Kaynak (markdown) görünümü', shortcut: 'Ctrl+E', run: toggleViewMode },
-    { id: 'view.theme', group: 'Görünüm', label: $theme === 'dark' ? 'Light temaya geç' : 'Dark temaya geç', run: toggleTheme },
-    { id: 'view.settings', group: 'Görünüm', label: 'Ayarlar…', run: () => (settingsOpen = true) },
-    // Düzenle
-    { id: 'edit.find', group: 'Düzenle', label: 'Bul', shortcut: 'Ctrl+F', run: () => openFind(false) },
-    { id: 'edit.replace', group: 'Düzenle', label: 'Değiştir', shortcut: 'Ctrl+H', run: () => openFind(true) },
-    // Dışa aktar
-    { id: 'export.html', group: 'Dışa aktar', label: 'HTML olarak dışa aktar', run: handleExportHtml },
-    { id: 'export.pdf', group: 'Dışa aktar', label: 'PDF olarak yazdır', shortcut: 'Ctrl+P', run: handleExportPdf },
-    // Sekme navigasyonu
-    { id: 'nav.next', group: 'Sekme', label: 'Sıradaki sekme', shortcut: 'Ctrl+Tab', run: () => cycleActive(1) },
-    { id: 'nav.prev', group: 'Sekme', label: 'Önceki sekme', shortcut: 'Ctrl+Shift+Tab', run: () => cycleActive(-1) },
-    // Açık sekmeler
+    { id: 'file.new', group: $t('group.file'), label: $t('cmd.file.new'), shortcut: 'Ctrl+N', run: handleNew },
+    { id: 'file.open', group: $t('group.file'), label: $t('cmd.file.open'), shortcut: 'Ctrl+O', run: handleOpen },
+    { id: 'file.save', group: $t('group.file'), label: $t('cmd.file.save'), shortcut: 'Ctrl+S', run: handleSave },
+    { id: 'file.save-as', group: $t('group.file'), label: $t('cmd.file.save-as'), shortcut: 'Ctrl+Shift+S', run: handleSaveAs },
+    { id: 'file.close', group: $t('group.file'), label: $t('cmd.file.close'), shortcut: 'Ctrl+W', run: handleCloseActive },
+    { id: 'view.outline', group: $t('group.view'), label: outlineOpen ? $t('cmd.view.outline.hide') : $t('cmd.view.outline.show'), run: toggleOutline },
+    { id: 'view.source', group: $t('group.view'), label: $viewMode === 'source' ? $t('cmd.view.wysiwyg') : $t('cmd.view.source'), shortcut: 'Ctrl+E', run: toggleViewMode },
+    { id: 'view.theme', group: $t('group.view'), label: $theme === 'dark' ? $t('cmd.view.theme.light') : $t('cmd.view.theme.dark'), run: toggleTheme },
+    { id: 'view.settings', group: $t('group.view'), label: $t('cmd.view.settings'), run: () => (settingsOpen = true) },
+    { id: 'edit.find', group: $t('group.edit'), label: $t('cmd.edit.find'), shortcut: 'Ctrl+F', run: () => openFind(false) },
+    { id: 'edit.replace', group: $t('group.edit'), label: $t('cmd.edit.replace'), shortcut: 'Ctrl+H', run: () => openFind(true) },
+    { id: 'export.html', group: $t('group.export'), label: $t('cmd.export.html'), run: handleExportHtml },
+    { id: 'export.pdf', group: $t('group.export'), label: $t('cmd.export.pdf'), shortcut: 'Ctrl+P', run: handleExportPdf },
+    { id: 'nav.next', group: $t('group.tab'), label: $t('cmd.nav.next'), shortcut: 'Ctrl+Tab', run: () => cycleActive(1) },
+    { id: 'nav.prev', group: $t('group.tab'), label: $t('cmd.nav.prev'), shortcut: 'Ctrl+Shift+Tab', run: () => cycleActive(-1) },
     ...$docs.map((d) => ({
       id: `tab.${d.id}`,
-      group: 'Sekmeye git',
+      group: $t('group.tab.go'),
       label: docName(d) + (isDirty(d) ? ' ●' : ''),
       keywords: d.path ?? '',
       run: () => activeId.set(d.id),
     })),
-    // Son dosyalar
     ...$recentFiles.map((p) => ({
       id: `recent.${p}`,
-      group: 'Son dosya',
+      group: $t('group.recent'),
       label: recentLabel(p),
       keywords: p,
       run: () => openRecent(p),
@@ -295,19 +289,19 @@ $$
   <header class="topbar">
     <span class="brand">Markdown Editor</span>
     <div class="spacer"></div>
-    <button class="btn" type="button" onclick={handleNew} title="Yeni (Ctrl/Cmd+N)">Yeni</button>
-    <button class="btn" type="button" onclick={handleOpen} title="Aç (Ctrl/Cmd+O)">Aç</button>
+    <button class="btn" type="button" onclick={handleNew} title={$t('topbar.new.tooltip')}>{$t('topbar.new')}</button>
+    <button class="btn" type="button" onclick={handleOpen} title={$t('topbar.open.tooltip')}>{$t('topbar.open')}</button>
     <div class="dropdown-wrap">
       <button
         class="btn"
         type="button"
         onclick={() => (recentOpen = !recentOpen)}
-        title="Son dosyalar (Ctrl/Cmd+R)"
-      >Son ▾</button>
+        title={$t('topbar.recent.tooltip')}
+      >{$t('topbar.recent')}</button>
       {#if recentOpen}
         <div class="dropdown" role="menu">
           {#if $recentFiles.length === 0}
-            <div class="dropdown-empty">Henüz dosya yok</div>
+            <div class="dropdown-empty">{$t('topbar.recent.empty')}</div>
           {:else}
             {#each $recentFiles as path (path)}
               <button class="dropdown-item" type="button" onclick={() => openRecent(path)} title={path}>
@@ -319,15 +313,15 @@ $$
         </div>
       {/if}
     </div>
-    <button class="btn" type="button" onclick={handleSave} title="Kaydet (Ctrl/Cmd+S)">Kaydet</button>
-    <button class="btn" type="button" onclick={handleExportHtml} title="HTML olarak dışa aktar">HTML</button>
-    <button class="btn" type="button" onclick={handleExportPdf} title="PDF olarak yazdır (Ctrl/Cmd+P)">PDF</button>
-    <button class="btn" type="button" onclick={toggleViewMode} title="Görünüm modu (Ctrl/Cmd+E)">
-      {$viewMode === 'source' ? 'WYSIWYG' : 'Kaynak'}
+    <button class="btn" type="button" onclick={handleSave} title={$t('topbar.save.tooltip')}>{$t('topbar.save')}</button>
+    <button class="btn" type="button" onclick={handleExportHtml} title={$t('topbar.html.tooltip')}>{$t('topbar.html')}</button>
+    <button class="btn" type="button" onclick={handleExportPdf} title={$t('topbar.pdf.tooltip')}>{$t('topbar.pdf')}</button>
+    <button class="btn" type="button" onclick={toggleViewMode} title={$t('topbar.viewmode.tooltip')}>
+      {$viewMode === 'source' ? $t('topbar.wysiwyg') : $t('topbar.source')}
     </button>
-    <button class="icon-btn" type="button" onclick={toggleOutline} title="İçindekiler paneli">≡</button>
-    <button class="icon-btn" type="button" onclick={() => (settingsOpen = true)} title="Ayarlar">⚙</button>
-    <button class="icon-btn" type="button" onclick={toggleTheme} title="Tema değiştir">
+    <button class="icon-btn" type="button" onclick={toggleOutline} title={$t('topbar.outline.tooltip')}>≡</button>
+    <button class="icon-btn" type="button" onclick={() => (settingsOpen = true)} title={$t('topbar.settings.tooltip')}>⚙</button>
+    <button class="icon-btn" type="button" onclick={toggleTheme} title={$t('topbar.theme.tooltip')}>
       {$theme === 'dark' ? '☀' : '☾'}
     </button>
   </header>
@@ -361,7 +355,7 @@ $$
         <CommandPalette commands={paletteCommands} onClose={() => (paletteOpen = false)} />
       {/if}
     {:else}
-      <div class="empty">Hiç sekme açık değil. <button class="btn" onclick={handleNew}>Yeni Sekme</button></div>
+      <div class="empty">{$t('topbar.empty')} <button class="btn" onclick={handleNew}>{$t('topbar.new-tab')}</button></div>
     {/if}
   </main>
 </div>

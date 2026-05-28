@@ -1,5 +1,6 @@
 <script lang="ts">
   import { docs, activeId, docName, isDirty, setActive, closeDoc, createUntitled } from './documents';
+  import { t } from './i18n';
 
   function onCloseClick(event: MouseEvent, id: string) {
     event.stopPropagation();
@@ -25,12 +26,12 @@
         class="close"
         role="button"
         tabindex="-1"
-        aria-label="Sekmeyi kapat"
+        aria-label={$t('tab.close')}
         onclick={(e) => onCloseClick(e, doc.id)}
       >×</span>
     </button>
   {/each}
-  <button type="button" class="new-tab" title="Yeni sekme (Ctrl/Cmd+T)" onclick={() => createUntitled('')}>+</button>
+  <button type="button" class="new-tab" title={$t('tab.new')} onclick={() => createUntitled('')}>+</button>
 </div>
 
 <style>
