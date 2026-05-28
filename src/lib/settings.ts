@@ -13,7 +13,7 @@ export type Settings = {
 const KEY = 'markdown-editor:settings';
 
 const DEFAULTS: Settings = {
-  atBehavior: 'inline',
+  atBehavior: 'new-paragraph',
   outlineDefaultOpen: true,
   autosaveEnabled: true,
   confirmOnClose: true,

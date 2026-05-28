@@ -1,16 +1,30 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { invoke } from '@tauri-apps/api/core';
 import { confirm } from '@tauri-apps/plugin-dialog';
 import { get } from 'svelte/store';
 import { docs, isDirty } from './documents';
 import { flushNow } from './autosave';
 import { getSettings } from './settings';
 
+async function forceQuit(): Promise<void> {
+  try {
+    await invoke('force_exit');
+  } catch (err) {
+    console.error('force_exit failed, falling back to window.close():', err);
+    try {
+      await getCurrentWindow().close();
+    } catch (err2) {
+      console.error('window.close() also failed:', err2);
+    }
+  }
+}
+
 export async function installCloseGuard(): Promise<() => void> {
   const win = getCurrentWindow();
-  let detached = false;
+  let exiting = false;
 
   const unlisten = await win.onCloseRequested(async (event) => {
-    if (detached) return;
+    if (exiting) return;
     if (!getSettings().confirmOnClose) return;
     const dirtyDocs = get(docs).filter(isDirty);
     if (dirtyDocs.length === 0) return;
@@ -25,15 +39,15 @@ export async function installCloseGuard(): Promise<() => void> {
     );
     if (!ok) return;
 
-    try {
-      await flushNow();
-    } catch (err) {
-      console.error('Flush before close failed:', err);
-    }
+    exiting = true;
 
-    detached = true;
-    unlisten();
-    await win.close();
+    // flushNow disk writes — yine de çıkışı engellemesin. 1.5sn timeout.
+    void Promise.race([
+      flushNow(),
+      new Promise<void>((resolve) => setTimeout(resolve, 1500)),
+    ]).finally(() => {
+      void forceQuit();
+    });
   });
 
   return unlisten;
