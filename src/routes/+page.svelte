@@ -2,20 +2,47 @@
   import { onMount } from 'svelte';
   import Editor from '$lib/Editor.svelte';
   import Preview from '$lib/Preview.svelte';
-  import { content } from '$lib/stores';
+  import TabBar from '$lib/TabBar.svelte';
   import { theme, toggleTheme } from '$lib/theme';
   import { openFile, saveToPath, chooseSavePath, basename } from '$lib/file';
+  import {
+    docs,
+    activeDoc,
+    activeId,
+    createUntitled,
+    openInTab,
+    updateContent,
+    markSaved,
+    closeDoc,
+    cycleActive,
+    docName,
+    isDirty,
+  } from '$lib/documents';
+  import { get } from 'svelte/store';
 
-  let editorValue = $state($content);
-  let previewSource = $state($content);
-  let currentPath = $state<string | null>(null);
-  let savedContent = $state(editorValue);
+  const WELCOME = `# Welcome to Markdown Editor
 
-  let isDirty = $derived(editorValue !== savedContent);
+Solda yaz, sağda **canlı önizleme**.
+
+## Kısayollar
+
+- \`Ctrl/Cmd+N\` — yeni sekme
+- \`Ctrl/Cmd+T\` — yeni sekme (alternatif)
+- \`Ctrl/Cmd+W\` — aktif sekmeyi kapat
+- \`Ctrl/Cmd+Tab\` — sıradaki sekme
+- \`Ctrl/Cmd+O\` — dosya aç
+- \`Ctrl/Cmd+S\` — kaydet
+- \`Ctrl/Cmd+Shift+S\` — farklı kaydet
+`;
+
+  let previewSource = $state('');
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
   let docTitle = $derived.by(() => {
-    const name = currentPath ? basename(currentPath) : 'Untitled.md';
-    return `${isDirty ? '● ' : ''}${name} — Markdown Editor`;
+    const doc = $activeDoc;
+    if (!doc) return 'Markdown Editor';
+    const dirty = isDirty(doc) ? '● ' : '';
+    return `${dirty}${docName(doc)} — Markdown Editor`;
   });
 
   $effect(() => {
@@ -24,60 +51,79 @@
     }
   });
 
-  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-
-  function onEditorChange(next: string) {
-    editorValue = next;
-    content.set(next);
+  $effect(() => {
+    const doc = $activeDoc;
+    if (!doc) {
+      previewSource = '';
+      return;
+    }
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      previewSource = next;
+      previewSource = doc.content;
     }, 100);
+  });
+
+  function onEditorChange(next: string) {
+    const id = get(activeId);
+    if (!id) return;
+    updateContent(id, next);
   }
 
   async function handleOpen() {
     try {
       const opened = await openFile();
       if (!opened) return;
-      currentPath = opened.path;
-      editorValue = opened.content;
-      savedContent = opened.content;
-      previewSource = opened.content;
-      content.set(opened.content);
+      openInTab(opened.path, opened.content);
     } catch (err) {
       console.error('Open failed:', err);
     }
   }
 
   async function handleSave() {
+    const doc = get(activeDoc);
+    if (!doc) return;
     try {
-      let path = currentPath;
+      let path = doc.path;
       if (!path) {
-        path = await chooseSavePath('Untitled.md');
+        path = await chooseSavePath(docName(doc));
         if (!path) return;
       }
-      await saveToPath(path, editorValue);
-      currentPath = path;
-      savedContent = editorValue;
+      await saveToPath(path, doc.content);
+      markSaved(doc.id, path);
     } catch (err) {
       console.error('Save failed:', err);
     }
   }
 
   async function handleSaveAs() {
+    const doc = get(activeDoc);
+    if (!doc) return;
     try {
-      const path = await chooseSavePath(currentPath ?? 'Untitled.md');
+      const path = await chooseSavePath(doc.path ?? docName(doc));
       if (!path) return;
-      await saveToPath(path, editorValue);
-      currentPath = path;
-      savedContent = editorValue;
+      await saveToPath(path, doc.content);
+      markSaved(doc.id, path);
     } catch (err) {
       console.error('Save As failed:', err);
     }
   }
 
+  function handleNew() {
+    createUntitled('');
+  }
+
+  function handleCloseActive() {
+    const id = get(activeId);
+    if (id) closeDoc(id);
+  }
+
   function handleKeydown(event: KeyboardEvent) {
     const mod = event.ctrlKey || event.metaKey;
+    if (event.key === 'Tab' && event.ctrlKey) {
+      event.preventDefault();
+      cycleActive(event.shiftKey ? -1 : 1);
+      return;
+    }
     if (!mod) return;
     const key = event.key.toLowerCase();
     if (key === 's' && event.shiftKey) {
@@ -89,10 +135,19 @@
     } else if (key === 'o') {
       event.preventDefault();
       handleOpen();
+    } else if (key === 'n' || key === 't') {
+      event.preventDefault();
+      handleNew();
+    } else if (key === 'w') {
+      event.preventDefault();
+      handleCloseActive();
     }
   }
 
   onMount(() => {
+    if (get(docs).length === 0) {
+      createUntitled(WELCOME);
+    }
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
   });
@@ -101,11 +156,8 @@
 <div class="app">
   <header class="topbar">
     <span class="brand">Markdown Editor</span>
-    <span class="file-name">
-      {currentPath ? basename(currentPath) : 'Untitled.md'}
-      {#if isDirty}<span class="dirty" title="Kaydedilmemiş değişiklik">●</span>{/if}
-    </span>
     <div class="spacer"></div>
+    <button class="btn" type="button" onclick={handleNew} title="Yeni (Ctrl/Cmd+N)">Yeni</button>
     <button class="btn" type="button" onclick={handleOpen} title="Aç (Ctrl/Cmd+O)">Aç</button>
     <button class="btn" type="button" onclick={handleSave} title="Kaydet (Ctrl/Cmd+S)">Kaydet</button>
     <button class="icon-btn" type="button" onclick={toggleTheme} title="Tema değiştir">
@@ -113,13 +165,21 @@
     </button>
   </header>
 
+  <TabBar />
+
   <main class="split">
-    <section class="pane editor-pane">
-      <Editor value={editorValue} onChange={onEditorChange} />
-    </section>
-    <section class="pane preview-pane">
-      <Preview source={previewSource} />
-    </section>
+    {#if $activeDoc}
+      {#key $activeDoc.id}
+        <section class="pane editor-pane">
+          <Editor value={$activeDoc.content} onChange={onEditorChange} />
+        </section>
+        <section class="pane preview-pane">
+          <Preview source={previewSource} />
+        </section>
+      {/key}
+    {:else}
+      <div class="empty">Hiç sekme açık değil. <button class="btn" onclick={handleNew}>Yeni Sekme</button></div>
+    {/if}
   </main>
 </div>
 
@@ -136,7 +196,7 @@
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     padding: 0 12px;
     background: var(--bg-elevated);
     border-bottom: 1px solid var(--border-subtle);
@@ -147,20 +207,6 @@
     font-weight: 600;
     font-size: 13px;
     letter-spacing: 0.02em;
-  }
-
-  .file-name {
-    font-size: 12px;
-    color: var(--text-muted);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .dirty {
-    color: var(--accent);
-    font-size: 14px;
-    line-height: 1;
   }
 
   .spacer {
@@ -222,5 +268,14 @@
   .preview-pane {
     background: var(--bg-elevated);
     border-left: 1px solid var(--border-subtle);
+  }
+
+  .empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text-muted);
   }
 </style>
