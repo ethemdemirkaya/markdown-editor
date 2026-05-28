@@ -1,6 +1,6 @@
 [package]
 name = "markdown-editor"
-version = "0.1.0"
+version = "0.1.1"
 description = "Tauri 2.0 + Svelte + TypeScript markdown editor"
 authors = ["Ethem Demirkaya"]
 edition = "2021"
