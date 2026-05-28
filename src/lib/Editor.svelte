@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { EditorView, keymap, lineNumbers, highlightActiveLine } from '@codemirror/view';
-  import { EditorState } from '@codemirror/state';
+  import { EditorState, Compartment } from '@codemirror/state';
   import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
   import { markdown } from '@codemirror/lang-markdown';
-  import { syntaxHighlighting, defaultHighlightStyle, bracketMatching, indentOnInput } from '@codemirror/language';
+  import { bracketMatching, indentOnInput } from '@codemirror/language';
+  import { themeExtension } from './cm-theme';
+  import { theme } from './theme';
 
   type Props = {
     value: string;
@@ -15,8 +17,12 @@
 
   let host: HTMLDivElement;
   let view: EditorView | null = null;
+  const themeCompartment = new Compartment();
+  let unsubTheme: (() => void) | null = null;
 
   onMount(() => {
+    const initialMode = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+
     const state = EditorState.create({
       doc: value,
       extensions: [
@@ -25,10 +31,10 @@
         history(),
         bracketMatching(),
         indentOnInput(),
-        syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         markdown(),
         keymap.of([...defaultKeymap, ...historyKeymap]),
         EditorView.lineWrapping,
+        themeCompartment.of(themeExtension(initialMode)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChange(update.state.doc.toString());
@@ -38,9 +44,16 @@
     });
 
     view = new EditorView({ state, parent: host });
+
+    unsubTheme = theme.subscribe((mode) => {
+      view?.dispatch({
+        effects: themeCompartment.reconfigure(themeExtension(mode)),
+      });
+    });
   });
 
   onDestroy(() => {
+    unsubTheme?.();
     view?.destroy();
     view = null;
   });
